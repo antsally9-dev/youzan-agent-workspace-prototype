@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>有赞经营工作台 · 工作对象与移动端原型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Hallmark · macrostructure: merchant workbench · tone: industrial/utilitarian · anchor hue: Youzan orange
+     * pre-emit critique: P5 H5 E4 S5 R5 V4
+     */
+    /* Inlined design tokens keep this prototype usable when the HTML is opened alone on a phone. */
+    :root{
+      --color-paper:oklch(97.8% 0.008 92);
+      --color-canvas:oklch(99.4% 0.004 92);
+      --color-sidebar:oklch(95.8% 0.009 95);
+      --color-surface:oklch(100% 0 0);
+      --color-ink:oklch(25% 0.025 150);
+      --color-muted:oklch(52% 0.018 155);
+      --color-quiet:oklch(65% 0.012 155);
+      --color-line:oklch(88.8% 0.009 140);
+      --color-line-strong:oklch(80.5% 0.014 145);
+      --color-accent:oklch(61% 0.185 39);
+      --color-accent-tint:oklch(96.2% 0.022 42);
+      --color-forest:oklch(43% 0.07 155);
+      --color-forest-tint:oklch(95.2% 0.016 155);
+      --color-amber:oklch(55% 0.12 82);
+      --color-amber-tint:oklch(96% 0.026 82);
+      --color-danger:oklch(54% 0.15 27);
+      --color-danger-tint:oklch(96% 0.02 27);
+      --color-shadow:oklch(25% 0.025 150 / 7%);
+      --font-body:"Noto Sans SC","Microsoft YaHei",sans-serif;
+      --font-mono:"IBM Plex Mono","Consolas",monospace;
+      --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;
+      --radius-sm:4px;--radius-md:8px;--radius-lg:12px;
+      --text-xs:11px;--text-sm:12px;--text-base:14px;--text-lg:16px;--text-xl:20px;--text-2xl:27px;
+      --ease-out:cubic-bezier(.2,.8,.2,1);--dur-fast:140ms;--dur-base:220ms;
+      --rule-hairline:1px solid var(--color-line);
+    }
+    *{box-sizing:border-box}
+    [hidden]{display:none!important}
+    html,body{margin:0;min-width:0;overflow-x:clip}
+    body{font:var(--text-base)/1.55 var(--font-body);color:var(--color-ink);background:var(--color-canvas)}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.55}
+    button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+    h1,h2,h3,p{margin:0}
+    h1,h2,h3{line-height:1.35}
+    .muted{color:var(--color-muted)}
+    .mono{font-family:var(--font-mono)}
+    .eyebrow{font:600 10px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--color-muted);text-transform:uppercase}
+    .app-shell{display:grid;grid-template-columns:224px minmax(0,1fr);min-height:100vh}
+    .sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;min-width:0;background:var(--color-sidebar);border-right:var(--rule-hairline)}
+    .side-head{padding:23px 14px 13px}
+    .brand{font-size:17px;font-weight:700;letter-spacing:-.035em;display:flex;align-items:center;gap:9px;padding:0 9px 20px}
+    .brand-mark{display:grid;place-items:center;width:27px;height:27px;border-radius:var(--radius-sm);background:var(--color-accent);color:var(--color-surface);font-weight:700}
+    .scope{border:var(--rule-hairline);background:var(--color-surface);padding:10px 11px;border-radius:var(--radius-sm)}
+    .scope strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .scope span{display:block;font-size:10px;margin-top:3px;color:var(--color-muted)}
+    .side-scroll{padding:1px 10px 18px;min-height:0;overflow-y:auto;flex:1}
+    .side-label{font:600 10px/1.4 var(--font-mono);letter-spacing:.12em;color:var(--color-quiet);padding:18px 13px 7px}
+    .side-link,.task-link{width:100%;border:0;background:transparent;text-align:left;display:block;border-left:2px solid transparent;border-radius:0;padding:9px 11px;color:var(--color-muted);font-size:12px;line-height:1.4}
+    .side-link:hover,.task-link:hover{background:var(--color-paper);color:var(--color-ink)}
+    .side-link.active,.task-link.active{color:var(--color-accent);background:var(--color-accent-tint);border-left-color:var(--color-accent);font-weight:700}
+    .side-link.strong{color:var(--color-ink);font-weight:700}
+    .side-link.strong.active{color:var(--color-accent)}
+    .side-divider{height:1px;background:var(--color-line);margin:14px 12px 0}
+    .task-link strong,.task-link small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .task-link strong{font-size:11px;font-weight:600}
+    .task-link small{font-size:10px;margin-top:4px;color:var(--color-quiet)}
+    .side-foot{border-top:var(--rule-hairline);padding:12px 22px 18px;color:var(--color-muted);font-size:10px;line-height:1.6}
+    .workspace{min-width:0;display:flex;flex-direction:column}
+    .topbar{height:58px;flex:none;background:var(--color-surface);border-bottom:var(--rule-hairline);display:flex;align-items:center;gap:12px;padding:0 26px}
+    .location{font-size:11px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .location strong{color:var(--color-ink)}
+    .top-spacer{flex:1}
+    .demo-note{font:500 10px var(--font-mono);color:var(--color-muted);white-space:nowrap}
+    .role-switch{border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);padding:6px 10px;background:var(--color-surface);color:var(--color-ink);font-size:11px;white-space:nowrap}
+    .role-switch:hover{border-color:var(--color-accent)}
+    .page{display:none;min-width:0}
+    .page.active{display:block}
+    .btn{border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);background:var(--color-surface);color:var(--color-ink);font-weight:600;font-size:11px;padding:8px 12px;white-space:nowrap;transition:background var(--dur-fast),border-color var(--dur-fast)}
+    .btn:hover{border-color:var(--color-muted);background:var(--color-paper)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--color-accent);border-color:var(--color-accent);color:var(--color-surface)}
+    .btn.primary:hover{background:var(--color-ink);border-color:var(--color-ink)}
+    .text-btn{border:0;background:transparent;padding:0;color:var(--color-accent);font-size:11px;font-weight:700;white-space:nowrap}
+    .text-btn:hover{text-decoration:underline}
+    .tag{display:inline-flex;align-items:center;border:var(--rule-hairline);background:var(--color-surface);color:var(--color-muted);padding:3px 7px;border-radius:var(--radius-sm);font-size:10px;line-height:1.45;white-space:nowrap}
+    .tag.warn{color:var(--color-amber);background:var(--color-amber-tint);border-color:var(--color-amber-tint)}
+    .tag.good{color:var(--color-forest);background:var(--color-forest-tint);border-color:var(--color-forest-tint)}
+    .home-page{max-width:1270px;width:100%;margin:0 auto;padding:47px 52px 70px}
+    .home-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:26px}
+    .home-intro h1{font-size:30px;letter-spacing:-.045em;margin-top:8px}
+    .home-intro p{font-size:12px;color:var(--color-muted);margin-top:10px}
+    .home-scope{font-size:10px;color:var(--color-muted);white-space:nowrap}
+    .start-box{background:var(--color-surface);border:1px solid var(--color-line-strong);border-radius:var(--radius-md);box-shadow:0 8px 26px var(--color-shadow);padding:18px 19px 15px}
+    .start-box label{display:block;font-size:12px;font-weight:700;margin-bottom:9px}
+    .start-box textarea{display:block;width:100%;min-height:96px;resize:vertical;border:0;background:transparent;color:var(--color-ink);font-size:15px;line-height:1.65;outline:none}
+    .start-box textarea::placeholder,.task-input::placeholder{color:var(--color-quiet)}
+    .start-box:focus-within{border-color:var(--color-accent)}
+    .start-foot{display:flex;align-items:center;gap:9px;padding-top:12px;border-top:var(--rule-hairline)}
+    .start-foot span{font-size:10px;color:var(--color-muted);flex:1}
+    .quick-asks{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .quick-asks button{border:var(--rule-hairline);background:transparent;color:var(--color-muted);border-radius:var(--radius-sm);font-size:10px;padding:6px 8px}
+    .quick-asks button:hover{background:var(--color-surface);color:var(--color-ink)}
+    .home-lower{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(245px,.8fr);gap:48px;margin-top:55px}
+    .section-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:13px;border-bottom:1px solid var(--color-line-strong)}
+    .section-head h2{font-size:15px;letter-spacing:-.02em}
+    .section-head span{font-size:10px;color:var(--color-muted)}
+    .recent-row{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:var(--rule-hairline)}
+    .recent-row-main{min-width:0;flex:1}
+    .recent-row-main strong{display:block;font-size:13px;margin-bottom:4px}
+    .recent-row-main small{display:block;color:var(--color-muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .home-side section+section{margin-top:30px}
+    .home-side p{color:var(--color-muted);font-size:11px;line-height:1.75;margin-top:13px}
+    .home-side .subtle{font-size:10px;color:var(--color-quiet)}
+    .attention{padding:13px 0;border-bottom:var(--rule-hairline)}
+    .attention strong{display:block;font-size:11px;margin:5px 0}
+    .attention small{color:var(--color-muted);font-size:10px}
+    .task-page.active{display:flex;flex-direction:column;height:calc(100dvh - 58px);overflow:hidden}
+    .task-header{flex:none;background:var(--color-canvas);border-bottom:var(--rule-hairline);padding:18px 30px 16px}
+    .breadcrumbs{font-size:10px;color:var(--color-muted);display:flex;align-items:center;gap:8px;margin-bottom:9px}
+    .breadcrumbs button{border:0;background:transparent;color:var(--color-muted);padding:0;font-size:10px}
+    .breadcrumbs button:hover{color:var(--color-accent)}
+    .task-heading{display:flex;align-items:center;gap:16px}
+    .task-heading h1{font-size:19px;letter-spacing:-.025em;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .task-heading .btn{flex:none}
+    .task-subline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:11px}
+    .task-grid{display:grid;grid-template-columns:minmax(0,1fr) 274px;flex:1;min-height:0}
+    .thread{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--color-surface)}
+    .feed{min-height:0;flex:1;overflow-y:auto;padding:25px max(30px,calc((100% - 800px)/2)) 38px}
+    .event{margin-bottom:20px}
+    .event-label{font-size:10px;color:var(--color-muted);display:flex;justify-content:space-between;gap:12px;margin-bottom:7px}
+    .event.user{margin-left:18%;padding:12px 14px;background:var(--color-paper);border:var(--rule-hairline);border-radius:var(--radius-sm)}
+    .event.user p{font-size:12px;line-height:1.7;white-space:pre-wrap}
+    .event.agent p{font-size:12px;line-height:1.8;max-width:760px}
+    .event.agent .event-label strong{color:var(--color-forest)}
+    .tool-line{font-size:10px;color:var(--color-muted);border-left:2px solid var(--color-line-strong);padding:3px 0 3px 12px;margin:18px 0 18px 1px}
+    .result-card{border:var(--rule-hairline);border-radius:var(--radius-sm);background:var(--color-canvas);margin:14px 0 20px;overflow:hidden}
+    .result-head{display:flex;align-items:flex-start;gap:12px;padding:14px 16px 12px;border-bottom:var(--rule-hairline)}
+    .result-head div{min-width:0;flex:1}
+    .result-head strong{font-size:12px;display:block}
+    .result-head small{display:block;font-size:10px;color:var(--color-muted);margin-top:3px}
+    .result-body{padding:0 16px}
+    .data-table{width:100%;border-collapse:collapse;text-align:left;font-size:10px}
+    .data-table th{font-weight:600;color:var(--color-muted)}
+    .data-table th,.data-table td{border-bottom:var(--rule-hairline);padding:10px 8px 10px 0;white-space:nowrap}
+    .data-table tr:last-child td{border-bottom:0}
+    .result-foot{display:flex;align-items:center;gap:8px;padding:11px 16px;border-top:var(--rule-hairline);font-size:10px;color:var(--color-muted)}
+    .result-foot span{flex:1}
+    .artifact-body,.decision-body{padding:16px}
+    .artifact-body p,.decision-body p{font-size:11px;color:var(--color-muted);line-height:1.7}
+    .artifact-meta{display:flex;align-items:center;gap:7px;margin-top:12px;flex-wrap:wrap}
+    .decision-body .btn{margin-top:14px}
+    .task-composer{position:relative;z-index:4;flex:none;border-top:var(--rule-hairline);background:var(--color-surface);padding:14px max(30px,calc((100% - 800px)/2)) 18px}
+    .composer-inner{border:1px solid var(--color-line-strong);border-radius:var(--radius-md);background:var(--color-surface);padding:11px 12px 9px}
+    .composer-scope{font-size:10px;color:var(--color-muted);margin:6px 0 8px}
+    .composer-references{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+    .composer-reference{display:inline-flex;align-items:center;gap:6px;max-width:100%;border:var(--rule-hairline);border-radius:999px;background:var(--color-accent-tint);padding:5px 6px 5px 9px;font-size:10px;color:var(--color-ink)}
+    .composer-reference b{font-size:9px;color:var(--color-accent);font-weight:700;white-space:nowrap}
+    .composer-reference span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:185px}
+    .composer-reference button{border:0;background:transparent;color:var(--color-muted);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}
+    .task-input{display:block;width:100%;min-height:58px;max-height:160px;resize:vertical;border:0;outline:none;background:transparent;color:var(--color-ink);font-size:12px;line-height:1.6}
+    .composer-foot{display:flex;align-items:center;gap:10px;padding-top:7px}
+    .composer-foot span{flex:1;font-size:10px;color:var(--color-muted)}
+    .composer-add{width:27px;height:27px;flex:none;border:1px solid var(--color-line-strong);border-radius:50%;background:var(--color-paper);color:var(--color-ink);font-size:20px;line-height:1;cursor:pointer}
+    .composer-add[aria-expanded="true"]{background:var(--color-accent-tint);border-color:var(--color-accent);color:var(--color-accent)}
+    .reference-picker{position:absolute;left:max(30px,calc((100% - 800px)/2));bottom:calc(100% + 6px);width:min(560px,calc(100% - 60px));max-height:min(500px,70vh);display:flex;flex-direction:column;overflow:hidden;background:var(--color-surface);border:1px solid var(--color-line-strong);border-radius:var(--radius-md);box-shadow:0 18px 44px rgba(25,36,31,.15)}
+    .reference-picker[hidden],.composer-references[hidden]{display:none}
+    .reference-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 8px}
+    .reference-picker-head strong{font-size:13px}
+    .reference-picker-head button{border:0;background:transparent;color:var(--color-muted);cursor:pointer;font-size:11px}
+    .reference-picker-search{margin:0 16px 11px;width:calc(100% - 32px);border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);padding:9px 11px;background:var(--color-paper);font-size:11px}
+    .reference-tabs{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:0 16px 11px;border-bottom:var(--rule-hairline)}
+    .reference-tabs::-webkit-scrollbar,.reference-list::-webkit-scrollbar,.business-tabs::-webkit-scrollbar,.week-strip::-webkit-scrollbar,.mobile-menu::-webkit-scrollbar{display:none}
+    .reference-tabs button{border:1px solid var(--color-line-strong);border-radius:999px;background:var(--color-surface);padding:6px 9px;font-size:10px;white-space:nowrap;cursor:pointer;color:var(--color-muted)}
+    .reference-tabs button.active{background:var(--color-accent-tint);border-color:var(--color-accent);color:var(--color-accent);font-weight:700}
+    .reference-list{min-height:0;flex:1 1 auto;overflow-y:auto;scrollbar-width:none;padding:7px}
+    /* Fixed picker rows must never flex-shrink: crushed tabs pushed button text outside the pill borders. */
+    .reference-picker-head,.reference-picker-search,.reference-tabs,.reference-upload{flex:none}
+    .reference-result{display:block;text-align:left;width:100%;border:0;border-radius:var(--radius-sm);background:transparent;padding:9px 10px;cursor:pointer}
+    .reference-result:hover,.reference-result:focus-visible{background:var(--color-paper)}
+    .reference-result strong{display:block;font-size:11px;color:var(--color-ink)}
+    .reference-result span{display:block;font-size:10px;line-height:1.5;color:var(--color-muted);margin-top:3px}
+    .reference-empty{padding:15px 12px;color:var(--color-muted);font-size:11px}
+    .reference-upload{border-top:var(--rule-hairline);padding:11px 16px 13px;display:flex;align-items:center;gap:10px}
+    .reference-upload button{white-space:nowrap;border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);background:var(--color-paper);padding:7px 10px;font-size:10px;cursor:pointer}
+    .reference-upload span{color:var(--color-muted);font-size:10px;line-height:1.5}
+    .context-rail{border-left:var(--rule-hairline);background:var(--color-paper);padding:23px 18px;overflow-y:auto}
+    .rail-section+ .rail-section{margin-top:25px}
+    .rail-section h2{font-size:11px;margin-bottom:12px}
+    .rail-item{border-top:var(--rule-hairline);padding:10px 0}
+    .rail-item small{display:block;color:var(--color-muted);font-size:10px}
+    .rail-item strong{display:block;font-size:11px;margin-top:3px;line-height:1.5}
+    .rail-section .text-btn{margin-top:9px}
+    .prototype-note{font-size:10px;color:var(--color-muted);line-height:1.65;background:var(--color-surface);border:var(--rule-hairline);padding:11px;border-radius:var(--radius-sm)}
+    .standard-page{max-width:1240px;width:100%;margin:0 auto;padding:34px 40px 65px}
+    .page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .page-title h1{font-size:25px;letter-spacing:-.04em;margin-top:6px}
+    .page-title p{font-size:11px;color:var(--color-muted);margin-top:7px}
+    .context-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 13px;background:var(--color-accent-tint);border:var(--rule-hairline);font-size:10px;margin-bottom:20px}
+    .context-strip b{color:var(--color-accent)}
+    .context-strip .text-btn{margin-left:auto}
+    .business-quick{display:flex;justify-content:flex-end;margin:-3px 0 14px}
+    .business-tabs{display:flex;gap:20px;border-bottom:1px solid var(--color-line-strong);margin-bottom:20px;overflow-x:auto;scrollbar-width:none}
+    .business-tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:0 0 11px;color:var(--color-muted);font-size:11px;font-weight:700;white-space:nowrap}
+    .business-tabs button.active{color:var(--color-accent);border-color:var(--color-accent)}
+    .business-layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:22px}
+    .business-main,.business-help,.calendar-panel,.dossier-panel{border:var(--rule-hairline);background:var(--color-surface);border-radius:var(--radius-sm);padding:20px}
+    .business-main h2,.business-help h2,.calendar-panel h2,.dossier-panel h2{font-size:14px;margin-bottom:15px}
+    .business-help p{font-size:11px;color:var(--color-muted);line-height:1.8}
+    .business-help .btn{margin-top:15px}
+    .business-view{display:none}
+    .business-view.active{display:block}
+    .form-line{display:grid;grid-template-columns:130px minmax(0,1fr);gap:20px;padding:15px 0;border-top:var(--rule-hairline);font-size:11px}
+    .form-line>span{color:var(--color-muted)}
+    .form-line strong{font-size:11px}
+    .form-line small{display:block;font-size:10px;color:var(--color-muted);margin-top:4px}
+    .table-wrap{overflow-x:auto}
+    .calendar-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(250px,.75fr);gap:22px}
+    .calendar-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+    .calendar-top h2{margin:0}
+    .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:var(--rule-hairline);border-left:var(--rule-hairline)}
+    .weekday,.day{border-right:var(--rule-hairline);border-bottom:var(--rule-hairline);padding:6px;min-width:0}
+    .weekday{font-size:9px;color:var(--color-muted);text-align:center}
+    .day{min-height:73px;font:500 10px var(--font-mono)}
+    .day.today{background:var(--color-accent-tint)}
+    .day.blank{background:var(--color-paper)}
+    .calendar-chip{display:block;font:600 9px/1.3 var(--font-body);color:var(--color-forest);margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .calendar-chip.warn{color:var(--color-amber)}
+    .dossier-panel .rail-item:first-of-type{border-top:0}
+    .dossier-panel p{font-size:10px;color:var(--color-muted);line-height:1.7;margin-bottom:12px}
+    /* One-week merchant workbench: time, continuity, collaboration, business. */
+    .top-action{border:1px solid var(--color-line);background:var(--color-surface);border-radius:var(--radius-sm);padding:7px 10px;color:var(--color-muted);font-size:11px;white-space:nowrap}
+    .search-short{display:none}
+    .top-action:hover{color:var(--color-ink);border-color:var(--color-line-strong)}
+    .notification-action span,.inbox-count{display:inline-grid;place-items:center;min-width:17px;height:17px;border-radius:20px;background:var(--color-accent);color:var(--color-surface);font:600 10px var(--font-mono);margin-left:4px}
+    .home-page{max-width:1440px;padding:29px 38px 72px}
+    .home-intro{align-items:center;margin-bottom:24px}
+    .home-intro h1{font-size:27px;margin-top:5px}
+    .home-intro p{margin-top:6px;font-size:11px}
+    .home-intro .btn{font-size:12px;padding:10px 15px}
+    .week-panel{border:1px solid var(--color-line-strong);background:var(--color-surface);border-radius:var(--radius-md);overflow:hidden}
+    .week-panel-head{display:flex;align-items:end;justify-content:space-between;gap:15px;padding:17px 18px 13px}
+    .week-panel-head h2{font-size:17px;margin-top:4px;letter-spacing:-.025em}
+    .week-legend{display:flex;align-items:center;gap:15px;font-size:10px;color:var(--color-muted)}
+    .week-legend>span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+    .legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--color-forest)}
+    .legend-dot.attention-dot{background:var(--color-accent)}
+    .week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:var(--rule-hairline);border-bottom:var(--rule-hairline)}
+    .week-day{border:0;border-right:var(--rule-hairline);background:var(--color-surface);text-align:left;min-width:0;min-height:121px;padding:12px 11px 11px;color:var(--color-ink);position:relative}
+    .week-day:last-child{border-right:0}
+    .week-day:hover{background:var(--color-paper)}
+    .week-day.selected{background:var(--color-accent-tint);box-shadow:inset 0 3px var(--color-accent)}
+    .week-day .day-meta{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;color:var(--color-muted)}
+    .week-day .day-meta b{font-weight:600;color:var(--color-ink)}
+    .week-day .day-num{font:600 24px/1.15 var(--font-mono);margin:6px 0 7px}
+    .week-day.selected .day-num{color:var(--color-accent)}
+    .week-day .day-note{display:block;font-size:10px;line-height:1.4;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .week-day .day-note::before{content:'';display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--color-forest);vertical-align:middle;margin-right:6px}
+    .week-day .day-note.urgent::before{background:var(--color-accent)}
+    .week-day .day-note+ .day-note{margin-top:4px}
+    .dossier-band{width:100%;display:flex;align-items:center;gap:11px;min-width:0;border:0;background:var(--color-forest-tint);color:var(--color-ink);text-align:left;padding:10px 17px;font-size:10px}
+    .dossier-band:hover{background:var(--color-accent-tint)}
+    .dossier-band .dossier-mark{color:var(--color-forest);font-weight:700;white-space:nowrap}
+    .dossier-band strong{font-size:11px;white-space:nowrap}
+    .dossier-band>span:nth-child(3){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--color-muted)}
+    .dossier-band b{margin-left:auto;color:var(--color-forest);white-space:nowrap}
+    .home-content{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.78fr);gap:28px;margin-top:32px;align-items:start}
+    .work-column,.signal-column{min-width:0}
+    .panel-heading{display:flex;justify-content:space-between;align-items:end;gap:14px;border-bottom:1px solid var(--color-line-strong);padding-bottom:10px}
+    .panel-heading h2{font-size:16px;margin-top:3px;letter-spacing:-.02em}
+    .panel-heading>span{font-size:10px;color:var(--color-muted);text-align:right}
+    .continue-list{display:grid;gap:9px;padding-top:13px}
+    .continue-row{background:var(--color-surface);border:var(--rule-hairline);border-left:3px solid var(--color-accent);border-radius:var(--radius-sm);padding:15px 16px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 12px}
+    .continue-row.secondary{border-left-color:var(--color-forest)}
+    .continue-row .row-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+    .continue-row h3{font-size:14px;letter-spacing:-.02em}
+    .continue-row p{font-size:11px;color:var(--color-muted);line-height:1.65;margin-top:5px}
+    .continue-row .next-line{color:var(--color-ink);font-weight:600}
+    .continue-row .row-action{display:flex;align-items:flex-end}
+    .continue-row .row-foot{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;border-top:var(--rule-hairline);padding-top:9px;color:var(--color-muted);font-size:10px}
+    .today-heading{margin-top:29px}
+    .today-list{background:var(--color-surface);border:var(--rule-hairline);border-radius:var(--radius-sm);margin-top:13px}
+    .today-item{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 14px;border-bottom:var(--rule-hairline)}
+    .today-item:last-child{border-bottom:0}
+    .today-item .item-index{font:600 10px/1.7 var(--font-mono);color:var(--color-accent)}
+    .today-item strong{display:block;font-size:11px}
+    .today-item small{display:block;color:var(--color-muted);font-size:10px;line-height:1.55;margin-top:3px}
+    .today-item .text-btn{align-self:center}
+    .today-empty{padding:17px;color:var(--color-muted);font-size:11px;line-height:1.6}
+    .compact-composer{background:var(--color-paper);border:var(--rule-hairline);border-radius:var(--radius-sm);padding:14px;margin-top:22px}
+    .compact-composer label{display:block;font-size:11px;font-weight:700;margin-bottom:7px}
+    .compact-composer>div{display:flex;gap:8px}
+    .compact-composer input{border:1px solid var(--color-line-strong);background:var(--color-surface);border-radius:var(--radius-sm);padding:9px 11px;min-width:0;flex:1;font-size:11px}
+    .compact-composer small{display:block;color:var(--color-muted);font-size:10px;margin-top:7px}
+    .signal-column{background:var(--color-surface);border:var(--rule-hairline);border-radius:var(--radius-sm);padding:0 17px}
+    .signal-section{padding:17px 0}
+    .signal-section+ .signal-section{border-top:1px solid var(--color-line-strong)}
+    .signal-head h2{font-size:13px;margin-top:5px}
+    .summary-body,.signal-item{font-size:11px;line-height:1.65;margin-top:12px}
+    .summary-body p{color:var(--color-muted)}
+    .summary-body strong,.signal-item strong{display:block;color:var(--color-ink);font-size:11px}
+    .summary-body .text-btn{margin-top:9px}
+    .signal-item{border-top:var(--rule-hairline);padding-top:10px}
+    .signal-item:first-child{border-top:0;padding-top:0}
+    .signal-item small{display:block;font-size:10px;color:var(--color-muted);margin-top:2px}
+    .signal-item .text-btn{margin-top:6px}
+    .signal-item.observation{background:var(--color-forest-tint);border:0;padding:10px 11px;border-radius:var(--radius-sm)}
+    .business-launch{margin-top:34px}
+    .business-entry-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:13px}
+    .business-entry-grid button{min-width:0;text-align:left;border:var(--rule-hairline);border-radius:var(--radius-sm);background:var(--color-surface);padding:13px 14px;color:var(--color-ink)}
+    .business-entry-grid button:hover{border-color:var(--color-accent);background:var(--color-accent-tint)}
+    .business-entry-grid strong{display:block;font-size:12px;margin-bottom:4px}
+    .business-entry-grid span{display:block;color:var(--color-muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .shift-shortcut{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 16px;margin-top:14px;background:var(--color-paper);border:var(--rule-hairline);border-radius:var(--radius-sm)}
+    .shift-shortcut strong,.shift-shortcut small{display:block}
+    .shift-shortcut strong{font-size:12px;margin-top:3px}
+    .shift-shortcut small{font-size:10px;color:var(--color-muted);margin-top:2px}
+    .object-page{max-width:1310px}
+    .object-principle{display:flex;align-items:center;gap:20px;padding:14px 17px;background:var(--color-forest-tint);border-left:3px solid var(--color-forest);border-radius:var(--radius-sm);margin-bottom:20px}
+    .object-principle strong{font-size:12px;min-width:150px}
+    .object-principle span{font-size:11px;color:var(--color-muted);line-height:1.65}
+    .object-tabs,.calendar-filters{display:flex;align-items:center;gap:6px;overflow-x:auto;margin:17px 0 17px;border-bottom:1px solid var(--color-line-strong)}
+    .object-tabs button,.calendar-filters button{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--color-muted);padding:9px 12px 10px;font-size:11px;white-space:nowrap}
+    .object-tabs button.active,.calendar-filters button.active{border-bottom-color:var(--color-accent);color:var(--color-accent);font-weight:700}
+    .object-list{display:grid;gap:10px;min-width:0}
+    .object-card,.object-surface,.object-aside{background:var(--color-surface);border:var(--rule-hairline);border-radius:var(--radius-sm);padding:17px}
+    .object-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}
+    .object-card h2{font-size:13px;margin:6px 0}
+    .object-card p{font-size:11px;color:var(--color-muted);line-height:1.65}
+    .object-card .object-meta{font-size:10px;color:var(--color-muted);margin-top:8px;line-height:1.55}
+    .object-card .object-actions{display:flex;align-items:end;gap:8px}
+    .object-card .object-actions button{border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);background:var(--color-surface);color:var(--color-ink);font-size:10px;padding:6px 8px;white-space:nowrap}
+    .object-card .object-actions button:hover{border-color:var(--color-accent)}
+    .object-card .object-actions button.primary-action{background:var(--color-accent);border-color:var(--color-accent);color:var(--color-surface)}
+    .asset-layout,.dossier-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(270px,.75fr);gap:20px;align-items:start}
+    .object-aside h2{font-size:14px;margin:5px 0 13px}
+    .object-aside p{font-size:11px;color:var(--color-muted);line-height:1.7}
+    .object-aside .text-btn{margin-top:12px}
+    .asset-row{width:100%;text-align:left;border:var(--rule-hairline);border-radius:var(--radius-sm);background:var(--color-surface);color:var(--color-ink);padding:14px 16px}
+    .asset-row.active,.asset-row:hover{border-color:var(--color-accent);background:var(--color-accent-tint)}
+    .asset-row strong{display:block;font-size:12px;margin:5px 0}
+    .asset-row p,.asset-row small{display:block;color:var(--color-muted);font-size:10px;line-height:1.55}
+    .asset-row p{margin-top:5px}
+    .dossier-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--color-line);border:var(--rule-hairline);margin-bottom:19px}
+    .dossier-overview>div{background:var(--color-surface);padding:13px 14px;min-width:0}
+    .dossier-overview small{display:block;color:var(--color-muted);font-size:10px}
+    .dossier-overview strong{display:block;font-size:11px;line-height:1.5;margin-top:4px}
+    .dossier-timeline{margin-top:15px;border-left:2px solid var(--color-line-strong);padding-left:18px}
+    .dossier-timeline>div{padding:0 0 22px;position:relative}
+    .dossier-timeline>div:last-child{padding-bottom:2px}
+    .dossier-timeline>div::before{content:'';position:absolute;left:-24px;top:4px;width:9px;height:9px;border:2px solid var(--color-accent);border-radius:50%;background:var(--color-surface)}
+    .dossier-timeline time{display:block;font:600 10px var(--font-mono);color:var(--color-accent);margin-bottom:4px}
+    .dossier-timeline strong{display:block;font-size:12px}
+    .dossier-timeline p{color:var(--color-muted);font-size:11px;line-height:1.6;margin:4px 0 6px}
+    .dossier-timeline .text-btn{margin-right:9px}
+    .task-settings-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 18px 18px}
+    .task-settings-form label{display:flex;flex-direction:column;gap:5px;color:var(--color-muted);font-size:10px}
+    .task-settings-form label:nth-child(3),.settings-foot{grid-column:1/-1}
+    .task-settings-form input,.task-settings-form select{min-width:0;width:100%;border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);background:var(--color-surface);padding:8px 9px;color:var(--color-ink);font-size:11px}
+    .settings-foot{border-top:var(--rule-hairline);padding-top:12px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .settings-foot p{font-size:10px;line-height:1.5;color:var(--color-muted)}
+    .calendar-day-detail{margin-top:20px}
+    .calendar-grid .day.selectable{display:block;width:100%;text-align:left;border-top:0;border-left:0;background:var(--color-surface);color:var(--color-ink)}
+    .calendar-grid .day.selectable:hover,.calendar-grid .day.selected{background:var(--color-accent-tint)}
+    .calendar-grid .day.today{box-shadow:inset 0 2px var(--color-accent)}
+    .calendar-day-detail .object-card{border:0;border-bottom:var(--rule-hairline);border-radius:0;padding:12px 0}
+    .calendar-day-detail .object-card:last-child{border-bottom:0}
+    .calendar-day-detail .object-card h2{margin:2px 0 4px}
+    .search-dialog{width:min(540px,calc(100% - 28px));max-height:min(70vh,650px);border:1px solid var(--color-line-strong);border-radius:var(--radius-md);padding:0;background:var(--color-surface);color:var(--color-ink);box-shadow:0 22px 60px var(--color-shadow)}
+    .search-dialog::backdrop{background:var(--color-ink);opacity:.42}
+    .search-dialog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:17px 18px 12px}
+    .search-dialog-head label{font-size:14px;font-weight:700}
+    .search-dialog-head button{border:0;background:transparent;color:var(--color-muted);font-size:11px}
+    .search-dialog>input{display:block;width:calc(100% - 36px);margin:0 18px 11px;padding:10px 12px;border:1px solid var(--color-line-strong);border-radius:var(--radius-sm);font-size:12px}
+    .search-results{max-height:340px;overflow-y:auto;border-top:var(--rule-hairline)}
+    .search-results button{display:block;width:100%;text-align:left;padding:12px 18px;border:0;border-bottom:var(--rule-hairline);background:var(--color-surface);color:var(--color-ink)}
+    .search-results button:hover{background:var(--color-accent-tint)}
+    .search-results strong{display:block;font-size:12px}
+    .search-results span{display:block;color:var(--color-muted);font-size:10px;margin-top:3px}
+    .search-results .today-empty{border-bottom:var(--rule-hairline)}
+    .search-dialog>p{font-size:10px;color:var(--color-muted);line-height:1.5;padding:10px 18px 15px}
+    .mobile-nav{display:none}
+    @media(max-width:1120px){.home-page{padding-left:35px;padding-right:35px}.home-lower{gap:26px}.task-grid{grid-template-columns:minmax(0,1fr) 230px}.business-layout{grid-template-columns:minmax(0,1fr)}.business-help{display:none}}
+    @media(max-width:850px){.app-shell{grid-template-columns:190px minmax(0,1fr)}.home-lower,.calendar-layout{grid-template-columns:minmax(0,1fr)}.context-rail{display:none}.task-grid{grid-template-columns:minmax(0,1fr)}.home-side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.home-side section+section{margin-top:0}}
+    @media(max-width:650px){.app-shell{display:block}.sidebar{display:none}.workspace{min-height:100dvh}.topbar{height:52px;padding:0 15px}.demo-note{display:none}.mobile-nav{position:fixed;z-index:10;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:var(--color-surface);border-top:var(--rule-hairline)}.mobile-nav button{border:0;background:transparent;padding:10px 3px;color:var(--color-muted);font-size:10px;white-space:nowrap}.mobile-nav button.active{color:var(--color-accent);font-weight:700}.home-page{padding:32px 19px 82px}.home-intro{display:block}.home-intro h1{font-size:25px}.home-scope{margin-top:12px}.home-lower{margin-top:42px}.home-side{grid-template-columns:minmax(0,1fr)}.home-side section+section{margin-top:5px}.task-page.active{height:calc(100dvh - 52px - 41px)}.task-header{padding:14px 18px}.task-heading h1{font-size:16px}.task-heading .btn{font-size:10px;padding:6px 8px}.feed{padding:18px 18px 25px}.task-composer{padding:10px 12px}.event.user{margin-left:7%}.standard-page{padding:25px 18px 80px}.page-title h1{font-size:22px}.calendar-layout{gap:15px}.business-tabs{gap:14px}}
+    @media(max-width:390px){.role-switch{font-size:10px;padding:5px 6px}.location{font-size:10px}.start-foot span{display:none}.task-subline .tag:nth-child(n+3){display:none}.composer-foot span{font-size:9px}.day{min-height:47px}.calendar-chip{height:4px;font-size:0;background:var(--color-forest);border-radius:8px;max-width:20px}.calendar-chip.warn{background:var(--color-amber)}.form-line{grid-template-columns:1fr;gap:3px}}
+    @media(max-width:1120px){.home-page{padding-left:27px;padding-right:27px}.home-content{gap:18px}.week-day{padding-left:8px;padding-right:8px}}
+    @media(max-width:850px){.home-content{grid-template-columns:minmax(0,1fr)}.signal-column{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;padding:0 15px}.signal-section+ .signal-section{border-top:0}.week-legend>span{display:none}}
+    @media(max-width:650px){.home-page{padding:24px 16px 82px}.home-intro{display:flex;align-items:end;gap:10px}.home-intro h1{font-size:22px}.home-intro p{font-size:10px}.home-intro .btn{font-size:10px;padding:8px 9px}.topbar{gap:6px}.top-action{font-size:10px;padding:6px}.search-long{display:none}.search-short{display:inline}.notification-action span{font-size:9px}.week-panel-head{padding:13px 14px 11px}.week-panel-head h2{font-size:15px}.week-legend{gap:0}.week-strip{grid-template-columns:repeat(7,minmax(110px,1fr));overflow-x:auto;scrollbar-width:none}.week-day{min-height:102px;padding:9px}.week-day .day-num{font-size:20px}.dossier-band{padding:9px 12px}.dossier-band>span:nth-child(3){display:none}.home-content{margin-top:25px}.signal-column{display:block;padding:0 15px}.signal-section+ .signal-section{border-top:1px solid var(--color-line-strong)}.business-entry-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.business-launch{margin-top:27px}.panel-heading>span{max-width:140px}.continue-row{padding:12px}.compact-composer>div{gap:6px}.compact-composer input{font-size:10px}}
+    @media(max-width:390px){.home-intro .btn{white-space:normal;line-height:1.3;max-width:83px}.week-panel-head .eyebrow{font-size:9px}.continue-row{grid-template-columns:minmax(0,1fr)}.continue-row .row-action{align-items:start}.today-item{grid-template-columns:16px minmax(0,1fr);gap:6px}.today-item .text-btn{grid-column:2;justify-self:start}.business-entry-grid{gap:6px}.business-entry-grid button{padding:10px}.business-entry-grid strong{font-size:11px}}
+    @media(max-width:900px){.asset-layout,.dossier-layout{grid-template-columns:minmax(0,1fr)}.dossier-overview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:650px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}.object-principle{display:block;padding:12px}.object-principle strong{display:block;margin-bottom:5px}.object-principle span{display:block}.object-card{grid-template-columns:minmax(0,1fr)}.object-card .object-actions{align-items:start;flex-wrap:wrap}.task-settings-form{grid-template-columns:minmax(0,1fr)}.task-settings-form label:nth-child(3),.settings-foot{grid-column:auto}.settings-foot{align-items:stretch;flex-direction:column}.shift-shortcut{padding:11px}.shift-shortcut .btn{font-size:10px;padding:7px}.dossier-overview>div{padding:10px}.calendar-panel,.dossier-panel{padding:13px}.calendar-grid .day{min-height:61px}.calendar-grid .calendar-chip{font-size:8px}.object-tabs,.calendar-filters{margin:13px 0}.task-heading{gap:7px}.task-heading .btn{font-size:9px;padding:6px}}
+    @media(max-width:390px){.calendar-grid .day{min-height:47px}.calendar-grid .calendar-chip{height:4px;font-size:0;max-width:20px}.shift-shortcut{align-items:start}.shift-shortcut strong{font-size:11px}.shift-shortcut small{font-size:9px}.dossier-overview{grid-template-columns:minmax(0,1fr)}.object-card .object-actions button{white-space:normal}}
+    @media(prefers-reduced-motion:reduce){*{transition-duration:0ms!important;animation-duration:0ms!important;scroll-behavior:auto!important}}
+    @media(max-width:650px){.reference-upload{display:block}.reference-upload span{display:block;margin-top:7px}.composer-reference span{max-width:130px}}
+    /* Phone layout: keep every work area reachable with readable type and safe-area spacing. */
+    @media(max-width:650px){
+      html,body{width:100%;overflow-x:hidden}
+      .workspace{width:100%;min-width:0}
+      .topbar{position:sticky;top:0;z-index:8;min-width:0;padding:0 12px;gap:7px}
+      .location{flex:1;min-width:0;font-size:11px}
+      .location #locationPage{display:none}.location .crumb-sep{display:none}
+      .top-spacer{display:none}
+      .top-action{flex:none;min-height:38px;padding:6px 8px;font-size:11px}
+      .role-switch{flex:none;max-width:64px;min-height:38px;padding:5px 6px;font-size:11px}
+      .mobile-nav{min-height:60px;padding:2px 5px max(4px,env(safe-area-inset-bottom));box-shadow:0 -5px 18px var(--color-shadow)}
+      .mobile-nav button{min-height:54px;font-size:12px;font-weight:600}
+      .mobile-nav button.active{border-top:2px solid var(--color-accent)}
+      .home-page,.standard-page{padding-left:14px;padding-right:14px;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+      .home-intro{align-items:flex-start}
+      .home-intro h1{font-size:23px;line-height:1.3}
+      .home-intro p,.page-title p{font-size:12px;line-height:1.6}
+      .home-intro .btn{min-height:42px}
+      .page-title{align-items:flex-start;flex-wrap:wrap}
+      .page-title>div{min-width:0;flex:1 1 100%}
+      .page-title>.btn{min-height:42px}
+      .page-title>.tag{white-space:normal}
+      .week-panel-head{align-items:flex-start}
+      .week-panel-head .text-btn{min-height:38px;white-space:normal;text-align:right}
+      .week-strip{overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+      .week-day{scroll-snap-align:start}
+      .dossier-band{flex-wrap:wrap}
+      .dossier-band b{margin-left:auto}
+      .panel-heading{align-items:flex-start}
+      .panel-heading>span{max-width:45%;font-size:11px;line-height:1.4}
+      .continue-row h3{font-size:15px}
+      .continue-row p,.today-item strong,.summary-body,.signal-item,.signal-item strong{font-size:12px}
+      .today-item small,.signal-item small,.continue-row .row-foot{font-size:11px}
+      .today-item .text-btn{min-height:38px;white-space:normal;text-align:right}
+      .compact-composer>div{align-items:stretch}
+      .compact-composer input,.start-box textarea,.task-input,.search-dialog>input,.reference-picker-search,.task-settings-form input,.task-settings-form select{font-size:16px}
+      .compact-composer .btn{min-height:44px}
+      .business-entry-grid strong{font-size:12px}
+      .business-entry-grid span{font-size:11px}
+      .task-page.active{height:calc(100dvh - 112px - env(safe-area-inset-bottom))}
+      .task-header{padding:11px 14px 10px}
+      .task-heading{flex-wrap:wrap;gap:7px}
+      .task-heading h1{flex:1 1 100%;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:17px}
+      .task-heading .btn{min-height:38px;font-size:11px;padding:6px 9px}
+      .task-subline{max-height:47px;overflow:hidden;margin-top:8px}
+      .feed{padding:17px 14px 22px}
+      .event.user{margin-left:5%}
+      .event.user p,.event.agent p{font-size:13px}
+      .result-head{padding:12px}
+      .result-body{padding:0 11px}
+      .result-foot{flex-wrap:wrap;line-height:1.5}
+      .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .table-wrap .data-table{min-width:490px;font-size:11px}
+      .task-composer{padding:8px 10px}
+      .composer-inner{padding:9px 10px 8px}
+      .composer-scope{line-height:1.4}
+      .task-input{min-height:46px;max-height:110px;resize:none}
+      .composer-foot{gap:7px}
+      .composer-foot span{font-size:11px;line-height:1.35}
+      .composer-foot .kbd-hint{display:none}
+      .composer-foot .btn,.composer-add{min-width:42px;min-height:42px}
+      /* Phone: the picker becomes a bottom sheet anchored above the nav, with its own internal scrolling. */
+      .reference-picker{position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom));width:auto;max-height:min(540px,72dvh);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-left:0;border-right:0;border-bottom:0;box-shadow:0 -14px 40px rgba(25,36,31,.16)}
+      .reference-picker-head{padding:13px 14px 9px}
+      .reference-picker-head button{min-height:40px;padding:0 10px;font-size:12px}
+      .reference-picker-search{margin:0 12px 10px;width:calc(100% - 24px)}
+      .reference-tabs{padding:0 12px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+      .reference-tabs::-webkit-scrollbar{display:none}
+      .reference-tabs button{padding:9px 12px}
+      .reference-list{flex:1 1 auto;min-height:140px;padding:6px}
+      .reference-upload{padding:10px 12px 12px}
+      .reference-tabs button,.reference-result{min-height:42px}
+      .reference-result strong{font-size:12px}
+      .reference-result span,.reference-upload span{font-size:11px}
+      .reference-upload button{min-height:42px;font-size:12px}
+      .business-quick{justify-content:flex-start}
+      .business-quick .btn{min-height:42px;white-space:normal;text-align:left}
+      .business-tabs{gap:15px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+      .business-tabs button{min-height:42px;font-size:12px}
+      .business-main,.object-surface,.object-aside{padding:14px;min-width:0}
+      .form-line{grid-template-columns:minmax(0,1fr);gap:3px;padding:12px 0}
+      .form-line>span,.form-line strong{font-size:12px}
+      .form-line small{font-size:11px;line-height:1.5}
+      .object-principle span,.object-card p,.object-aside p,.dossier-timeline p{font-size:12px}
+      .object-card h2,.asset-row strong{font-size:14px}
+      .object-card .object-meta,.asset-row p,.asset-row small{font-size:11px}
+      .object-card .object-actions button{min-height:42px;font-size:12px;white-space:normal}
+      .object-tabs button,.calendar-filters button{min-height:42px;font-size:12px}
+      .calendar-grid .day{padding:3px;min-height:55px}
+      .calendar-grid .calendar-chip{font-size:8px}
+      .calendar-panel,.dossier-panel{padding:12px}
+      .search-dialog{width:calc(100% - 20px);max-height:calc(100dvh - 36px)}
+      .task-settings-form label{font-size:12px}
+      .task-settings-form .btn{min-height:44px}
+    }
+    @media(max-width:360px){
+      .topbar{padding:0 8px;gap:4px}
+      .location{font-size:10px}
+      .top-action{padding:5px 6px}
+      .role-switch{max-width:57px;font-size:10px}
+      .home-intro{flex-wrap:wrap}
+      .home-intro .btn{max-width:none}
+      .business-entry-grid{grid-template-columns:minmax(0,1fr)}
+      .calendar-grid .calendar-chip{display:none}
+      .calendar-grid .day{min-height:43px}
+    }
+    @media(max-width:650px){
+      body.mobile-keyboard .mobile-nav{display:none}
+      body.mobile-keyboard .task-page.active{height:calc(100dvh - 52px)}
+      body.mobile-keyboard .reference-picker{bottom:0}
+    }
+    @media(max-width:900px) and (pointer:coarse) and (orientation:landscape){
+      .app-shell{display:block}
+      .sidebar{display:none}
+      .workspace{min-height:100dvh}
+      .topbar{height:48px;padding:0 14px}
+      .mobile-nav{position:fixed;z-index:10;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));min-height:50px;padding-bottom:env(safe-area-inset-bottom);background:var(--color-surface);border-top:var(--rule-hairline)}
+      .mobile-nav button{min-height:48px;border:0;background:transparent;color:var(--color-muted);font-size:11px}
+      .mobile-nav button.active{color:var(--color-accent);font-weight:700;border-top:2px solid var(--color-accent)}
+      .home-page,.standard-page{padding:18px 20px calc(75px + env(safe-area-inset-bottom))}
+      .task-grid,.calendar-layout{grid-template-columns:minmax(0,1fr)}
+      .context-rail{display:none}
+      .task-page.active{height:calc(100dvh - 98px - env(safe-area-inset-bottom))}
+      .task-header{padding:8px 16px}
+      .task-subline{display:none}
+      .feed{padding:12px 18px}
+      .task-composer{padding:6px 16px}
+      .task-input{min-height:34px;max-height:70px;font-size:16px}
+      .reference-picker{max-height:calc(100dvh - 190px)}
+      .reference-tabs{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+      .reference-tabs::-webkit-scrollbar{display:none}
+      .compact-composer input,.reference-picker-search,.search-dialog>input{font-size:16px}
+      body .mobile-menu{bottom:calc(55px + env(safe-area-inset-bottom))}
+      body.mobile-keyboard .mobile-nav{display:none}
+      body.mobile-keyboard .task-page.active{height:calc(100dvh - 48px)}
+    }
+    .mobile-menu{position:fixed;top:auto;bottom:calc(66px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:470px;max-height:min(72dvh,620px);padding:0;border:1px solid var(--color-line-strong);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-ink);box-shadow:0 18px 45px rgba(25,36,31,.2);overflow-y:auto;scrollbar-width:none}
+    .mobile-menu::backdrop{background:rgba(20,30,25,.32)}
+    .mobile-menu-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;background:var(--color-surface);border-bottom:var(--rule-hairline)}
+    .mobile-menu-head strong{font-size:14px}
+    .mobile-menu-head button{border:0;background:transparent;color:var(--color-muted);min-height:40px}
+    .mobile-menu-group{padding:10px 16px 15px}
+    .mobile-menu-group+ .mobile-menu-group{border-top:var(--rule-hairline)}
+    .mobile-menu-group>span{display:block;font:600 10px var(--font-mono);color:var(--color-muted);margin-bottom:7px}
+    .mobile-menu-group>button{display:block;width:100%;min-height:44px;text-align:left;border:0;border-bottom:var(--rule-hairline);background:transparent;color:var(--color-ink);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="side-head"><div class="brand"><span class="brand-mark">赞</span>经营工作台</div><div class="scope"><strong id="scopeName">栖禾咖啡 · 新街口店</strong><span id="scopeRole">店主 · 本店范围</span></div></div>
+      <div class="side-scroll">
+        <div class="side-label">WORKSPACE</div>
+        <button class="side-link strong active" data-page="home">工作首页</button>
+        <button class="side-link strong" id="newTaskButton">＋ 新建 Task</button>
+        <button class="side-link" data-page="tasks">全部 Task</button>
+        <button class="side-link" data-page="calendar">日历</button>
+        <div class="side-label">RECENT TASKS</div>
+        <div id="sidebarTasks"></div>
+        <div class="side-divider"></div>
+        <div class="side-label">DISCOVER</div>
+        <button class="side-link" data-page="insights">洞察与观察</button>
+        <div class="side-divider"></div>
+        <div class="side-label">BUSINESS</div>
+        <button class="side-link" data-page="business" data-domain="customer">客户与会员</button>
+        <button class="side-link" data-page="business" data-domain="inventory">商品与库存</button>
+        <button class="side-link" data-page="business" data-domain="orders">订单与履约</button>
+        <button class="side-link" data-page="business" data-domain="marketing">营销与内容</button>
+        <button class="side-link" data-page="business" data-domain="store">门店与渠道</button>
+        <button class="side-link" data-page="business" data-domain="finance">财务与经营数据</button>
+        <div class="side-divider"></div>
+        <div class="side-label">KNOWLEDGE & ASSETS</div>
+        <button class="side-link" data-page="assets">资产目录</button>
+        <button class="side-link" data-page="dossier">经营档案</button>
+      </div>
+      <div class="side-foot">页面为设计原型。示例业务数据、操作与 Agent 回复均不会连接真实店铺。</div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><div class="location"><strong>栖禾咖啡</strong> / <span id="locationScope">新街口店</span><span class="crumb-sep"> /</span> <span id="locationPage">工作首页</span></div><div class="top-spacer"></div><button class="top-action" id="searchButton" type="button" aria-label="搜索工作与业务"><span class="search-long">搜索工作、客户、产物</span><span class="search-short">搜索</span></button><button class="top-action notification-action" type="button" data-anchor="homeMessages">消息 <span id="notificationCount">2</span></button><span class="demo-note">演示数据 · 本地原型</span><select class="role-switch" id="roleSwitch" aria-label="切换演示角色"><option value="owner">店主</option><option value="hq">总部</option><option value="staff">店员</option></select></header>
+
+      <section class="page home-page active" id="page-home" aria-label="一周工作台">
+        <div class="home-intro"><div><div class="eyebrow">WORKSPACE / THIS WEEK</div><h1>今天，接着往前做</h1><p><span id="homeScope">新街口店</span> · 先看昨天留下的工作，再处理今天需要你决定的事。</p></div><button class="btn primary" type="button" data-action="new-task">＋ 新建 Task</button></div>
+        <section class="week-panel" aria-label="近一周工作日历">
+          <div class="week-panel-head"><div><span class="eyebrow">演示周 · 2026 / 10 / 04 — 10</span><h2>近一周</h2></div><div class="week-legend"><span><i class="legend-dot planned"></i>工作节点</span><span><i class="legend-dot attention-dot"></i>待处理</span><button class="text-btn" type="button" data-page="calendar">打开完整日历 →</button></div></div>
+          <div class="week-strip" id="weekStrip" role="group" aria-label="选择日期"></div>
+          <button class="dossier-band" type="button" data-page="dossier"><span class="dossier-mark">经营档案</span><strong>国庆活动</strong><span>9 月开始筹备 · 多个 Task 与正式产物持续关联</span><b>查看档案 →</b></button>
+        </section>
+        <div class="shift-shortcut" id="shiftShortcut" hidden><div><span class="eyebrow">MY SHIFT</span><strong>今天早班 · 09:00–17:00</strong><small>新街口店 · 班次来源于门店与渠道中的正式班表</small></div><button class="btn" type="button" data-page="calendar">查看我的班次 →</button></div>
+        <div class="home-content">
+          <main class="work-column">
+            <div class="panel-heading"><div><span class="eyebrow">CONTINUE</span><h2>接着做</h2></div><span>保留上次进度和下一步</span></div>
+            <div id="homeRecent" class="continue-list"></div>
+            <div class="panel-heading today-heading"><div><span class="eyebrow">TODAY</span><h2 id="selectedDayTitle">今天要处理</h2></div><span id="todayCount">按到期、协作等待和置顶排列</span></div>
+            <div id="todayWork" class="today-list"></div>
+            <form class="compact-composer" id="homeForm"><label for="homeInput">还有新的经营问题？</label><div><input id="homeInput" autocomplete="off" placeholder="问数据、安排工作，或描述一个要完成的目标"><button class="btn primary" type="submit">开始 Task</button></div><small>在 Task 中继续讨论；查看业务数据与确认操作都能留在同一工作上下文。</small></form>
+          </main>
+          <aside class="signal-column">
+            <section class="signal-section"><div class="signal-head"><span class="eyebrow">YESTERDAY</span><h2>昨天留下了什么</h2></div><div id="yesterdaySummary"></div></section>
+            <section class="signal-section" id="homeMessages"><div class="signal-head"><span class="eyebrow">INBOX</span><h2>消息与交接 <span class="inbox-count" id="inboxCount">2</span></h2></div><div id="messageList"></div></section>
+            <section class="signal-section"><div class="signal-head"><span class="eyebrow">OBSERVATION</span><h2>值得关注</h2></div><div id="observationList"></div></section>
+          </aside>
+        </div>
+        <section class="business-launch"><div class="panel-heading"><div><span class="eyebrow">BUSINESS</span><h2>按业务开展工作</h2></div><span>数据页与 Task 在当前工作空间内相互返回</span></div><div class="business-entry-grid"><button type="button" data-page="business" data-domain="customer"><strong>客户与会员</strong><span>客户档案、人群、会员权益</span></button><button type="button" data-page="business" data-domain="inventory"><strong>商品与库存</strong><span>商品、可售库存、备货</span></button><button type="button" data-page="business" data-domain="orders"><strong>订单与履约</strong><span>订单、配送、售后</span></button><button type="button" data-page="business" data-domain="marketing"><strong>营销与内容</strong><span>活动、券、内容与 GEO</span></button><button type="button" data-page="business" data-domain="store"><strong>门店与渠道</strong><span>门店、小程序、渠道配置</span></button><button type="button" data-page="business" data-domain="finance"><strong>财务与经营数据</strong><span>收入、退款、预算与分析</span></button></div></section>
+      </section>
+
+      <section class="page standard-page object-page" id="page-tasks" aria-label="全部 Task"><div class="page-title"><div><div class="eyebrow">WORK / TASKS</div><h1>全部 Task</h1><p>主动创建、组织分派、由洞察转入的工作都在这里。周期性是 Task 的运行方式。</p></div><button class="btn primary" type="button" data-action="new-task">＋ 新建 Task</button></div><div class="object-principle"><strong>同一工作对象</strong><span>一次性或周期性、由人发起或由组织分派，都使用同一 Task 工作页；每次运行在原 Task 中留下记录，相关日期投影到日历。</span></div><div class="object-tabs"><button type="button" data-task-filter="all" class="active">全部</button><button type="button" data-task-filter="active">进行中</button><button type="button" data-task-filter="recurring">周期性</button></div><div id="taskIndexList" class="object-list"></div></section>
+
+      <section class="page task-page" id="page-task" aria-label="Task 工作区">
+        <div class="task-header"><div class="breadcrumbs"><button type="button" data-page="tasks">全部 Task</button><span>/</span><span>Task</span></div><div class="task-heading"><h1 id="taskTitle">Task</h1><button class="btn" id="taskSettingsButton" type="button">Task 设置</button><button class="btn" id="taskBusinessButton" type="button">查看相关业务</button></div><div class="task-subline" id="taskSubline"></div></div>
+        <div class="task-grid"><main class="thread"><div class="feed" id="taskFeed" aria-live="polite"></div><form class="task-composer" id="taskForm"><div class="reference-picker" id="referencePicker" hidden><div class="reference-picker-head"><strong>添加到当前 Task</strong><button type="button" id="closeReferencePicker">关闭</button></div><input class="reference-picker-search" id="referenceSearch" type="search" placeholder="搜索 Task、档案、知识、数据或 Skill" aria-label="搜索可引用内容"><div class="reference-tabs" id="referenceTabs"></div><div class="reference-list" id="referenceResults"></div><div class="reference-upload"><button type="button" id="uploadReferenceButton">↑ 上传本地文件</button><span>支持 PDF、Word、PPT、Excel、CSV、图片及代码文件。原型仅显示文件名，不读取或上传内容。</span><input id="referenceFileInput" type="file" multiple hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt,.md,.json,.js,.ts,.py,.html,.css,.png,.jpg,.jpeg,.webp"></div></div><div class="composer-inner"><label class="eyebrow" for="taskInput">继续这项工作</label><div class="composer-scope" id="composerScope"></div><div class="composer-references" id="referenceChips" hidden></div><textarea class="task-input" id="taskInput" placeholder="描述目标、补充要求，或说“每周四生成下周班表草稿，店长确认后发布”……"></textarea><div class="composer-foot"><button class="composer-add" id="addReferenceButton" type="button" aria-label="添加引用或上传文件" aria-expanded="false" aria-controls="referencePicker">+</button><span>添加引用或文件<span class="kbd-hint"> · Enter 发送 · Shift + Enter 换行</span></span><button class="btn primary" type="submit">发送</button></div></div></form></main><aside class="context-rail" aria-label="当前 Task 的上下文"><div class="rail-section"><div class="eyebrow">TASK CONTEXT</div><h2 style="margin-top:8px">关联信息</h2><div id="taskContext"></div></div><div class="rail-section"><h2>运行与确认</h2><div id="taskSettingsSummary"></div><button class="text-btn" type="button" id="railSettingsButton">调整 Task 设置 →</button></div><div class="rail-section"><h2>业务与档案</h2><button class="text-btn" id="railBusinessButton" type="button">打开相关业务数据</button><div style="height:10px"></div><button class="text-btn" type="button" data-page="dossier">查看经营档案</button></div><div class="rail-section"><div class="prototype-note">业务数据均标明来源与读取时间。涉及真实业务变更时，请先核验当前配置和影响范围。</div></div></aside></div>
+      </section>
+
+      <section class="page standard-page" id="page-business" aria-label="内嵌经营业务"><div class="page-title"><div><div class="eyebrow">BUSINESS / OBJECTS</div><h1>经营业务</h1><p>在同一工作空间查看业务数据与配置；由 Task 进入时可返回原工作上下文。</p></div><span class="tag">演示业务数据</span></div><div class="context-strip" id="businessContextStrip"><b>当前工作上下文</b><span id="businessContext">来自当前 Task</span><button class="text-btn" type="button" data-page="task">返回 Task</button></div><div class="business-quick"><button class="btn" type="button" id="businessReferenceQuick">＋ 引用当前业务页到 Task</button></div><div class="business-tabs"><button type="button" data-domain="customer">客户与会员</button><button type="button" data-domain="inventory">商品与库存</button><button type="button" data-domain="orders">订单与履约</button><button type="button" data-domain="marketing">营销与内容</button><button type="button" data-domain="store">门店与渠道</button><button type="button" data-domain="finance">财务与经营数据</button></div><div class="business-layout"><main class="business-main">
+        <div class="business-view" id="business-customer"><h2>客户与会员</h2><p class="muted" style="font-size:11px;margin-bottom:14px">原有客户记录与圈选条件在这里核验；以下是演示样本。</p><div class="table-wrap"><table class="data-table"><thead><tr><th>人群或门店</th><th>筛选条件</th><th>最近读取</th><th>状态</th></tr></thead><tbody id="customerRows"></tbody></table></div><div class="form-line"><span>当前数据范围</span><div><strong id="customerScope">新街口店</strong><small>实际明细必须经过当前用户的权限校验</small></div></div></div>
+        <div class="business-view" id="business-inventory"><h2>商品与库存</h2><p class="muted" style="font-size:11px;margin-bottom:14px">直接查看商品记录、可售库存和备货状态；以下是演示样本。</p><div class="table-wrap"><table class="data-table"><thead><tr><th>商品或门店</th><th>可售库存</th><th>在途</th><th>经营状态</th></tr></thead><tbody id="inventoryRows"></tbody></table></div><div class="form-line"><span>可执行操作</span><div><strong id="inventoryActions">调整预警阈值 · 创建补货单 · 核验供应商</strong><small>原型仅展示操作位置，不会修改真实库存</small></div></div></div>
+        <div class="business-view" id="business-orders"><h2>订单与履约</h2><p class="muted" style="font-size:11px;margin-bottom:14px">同一页面容纳订单列表、配送进度与售后处理。这里展示页面范围，尚未连接有赞接口。</p><div class="form-line"><span>订单工作</span><div><strong>待发货 · 配送中 · 已完成 · 售后中</strong><small>点击订单后在当前工作空间查看明细、处理记录与关联 Task</small></div></div><div class="form-line"><span>当前筛选</span><div><strong id="orderScope">新街口店 · 最近订单</strong><small>接入后按组织、门店与角色权限读取</small></div></div><div class="form-line"><span>操作位置</span><div><strong>核对订单 · 处理售后 · 查看履约异常</strong><small>涉及发货、退款等变更时按操作权限再次校验</small></div></div></div>
+        <div class="business-view" id="business-marketing"><h2>营销活动配置</h2><div class="form-line"><span>活动名称</span><div><strong id="marketingName">国庆老客回访券</strong><small>有赞营销草稿 · 关联商家自定义国庆活动档案</small></div></div><div class="form-line"><span>目标人群</span><div><strong id="marketingAudience">沉默老客 · 待核验</strong><small>可打开客户与会员页核对圈选依据</small></div></div><div class="form-line"><span>优惠券规则</span><div><strong>满 80 减 10 · 每人限领一张</strong><small>发送之前需重新计算预算并由授权人员确认</small></div></div><div class="form-line"><span>发送状态</span><div><strong>草稿 · 未启用</strong><small>实际操作结果应保存至组织云空间与 Task 历史</small></div></div></div>
+        <div class="business-view" id="business-store"><h2>门店与渠道</h2><p class="muted" style="font-size:11px;margin-bottom:14px">查看门店信息、小程序店铺配置、渠道页面、员工班表与当前生效状态。</p><div class="form-line"><span>当前范围</span><div><strong id="storeScope">新街口店</strong><small>总部、区域、门店在同一页面结构下看到各自有权管理的范围</small></div></div><div class="form-line"><span>常用页面</span><div><strong>门店列表 · 小程序页面 · 渠道配置 · 员工班表</strong><small>具体可复用页面与可调用操作，以产品线和接口核对结果为准</small></div></div><div class="form-line"><span>已发布班表</span><div><strong id="storeRoster">本周班次 · 新街口店</strong><small>班次作为业务数据在这里核对，并按日期显示在日历与员工移动端；草稿发布前仍需授权确认</small></div></div><div class="form-line"><span>Agent 可协助</span><div><strong>检查配置、生成建议、准备变更草稿</strong><small>例如在任意位置新建 Task，要求“每周四生成下周班表草稿”。周期设置保存在该 Task 中。</small></div></div></div>
+        <div class="business-view" id="business-finance"><h2>财务与经营数据</h2><p class="muted" style="font-size:11px;margin-bottom:14px">经营指标、交易、退款与营销预算在这里核对。演示原型不虚构实时金额。</p><div class="form-line"><span>经营指标</span><div><strong>收入 — · 订单 — · 退款 —</strong><small>接入后展示数据口径、时间范围、来源和最近更新时间</small></div></div><div class="form-line"><span>预算工作</span><div><strong>活动预算 · 券成本 · ROI 口径</strong><small>组织标准与个人习惯须经核验，不能直接由 Agent 猜测</small></div></div><div class="form-line"><span>可执行操作</span><div><strong>查看报表 · 追问异常 · 发起分析 Task</strong><small>金额及明细读取仍受当前角色权限控制</small></div></div></div>
+      </main><aside class="business-help"><div class="eyebrow">AGENT IN CONTEXT</div><h2 style="margin-top:9px" id="businessHelpTitle">在业务页继续核验</h2><p id="businessHelpText">Agent 的建议引用当前业务对象。商家可以查看原始记录、核对变更，再回到 Task 决定下一步。</p><button class="btn" type="button" id="businessReferenceButton">引用当前业务页到 Task</button><button class="btn" type="button" data-page="task" id="businessHelpBack">返回 Task</button></aside></div></section>
+
+      <section class="page standard-page object-page" id="page-calendar" aria-label="经营日历"><div class="page-title"><div><div class="eyebrow">TIME / INDEX</div><h1>经营日历</h1><p>日期是找回工作的入口。Task 的计划运行、洞察、已发布班次和经营档案节点都能在这里定位。</p></div><button class="btn" type="button" data-page="business" data-domain="store">查看门店班表 →</button></div><div class="object-principle"><strong>日历记录“何时”</strong><span>点开一个日期看到当时发生的工作；点开“国庆活动”则进入跨多日的经营档案。两者引用同一批 Task、洞察与资产。</span></div><div class="calendar-filters"><button class="active" type="button" data-cal-filter="all">全部</button><button type="button" data-cal-filter="task">Task</button><button type="button" data-cal-filter="insight">洞察</button><button type="button" data-cal-filter="shift">班次</button><button type="button" data-cal-filter="dossier">档案节点</button></div><div class="calendar-layout"><main class="calendar-panel"><div class="calendar-top"><h2>2026 / 10</h2><span class="muted" style="font-size:10px" id="calendarScope">新街口店 · 演示月</span></div><div class="calendar-grid" id="calendarGrid"></div><div class="calendar-day-detail"><div class="panel-heading"><div><span class="eyebrow">DAY RECORD</span><h2 id="calendarDayTitle">10 月 5 日</h2></div></div><div id="calendarDayEvents"></div></div></main><aside class="dossier-panel"><div class="eyebrow">CROSSES DATES</div><h2 style="margin-top:9px">国庆活动</h2><p>这是一份商家自己创建的长期经营档案。日历只显示它在各日期的节点，完整背景和正式产物留在档案中。</p><div class="rail-item"><small>时间范围</small><strong>9 月筹备 → 10 月执行与复盘</strong></div><div class="rail-item"><small>关联内容</small><strong>Task · 洞察 · 正式产物 · 营销配置</strong></div><button class="btn" type="button" data-page="dossier">打开经营档案 →</button></aside></div></section>
+
+      <section class="page standard-page object-page" id="page-insights" aria-label="洞察与观察"><div class="page-title"><div><div class="eyebrow">DISCOVER / EVIDENCE</div><h1>洞察与观察</h1><p>洞察是一次有证据的发现；观察是商家启用后持续运行的关注规则。</p></div><span class="tag">发现不会自动成为待办</span></div><div class="object-principle"><strong>先看依据，再决定下一步</strong><span>洞察可变成 Task、加入档案，或设为持续观察；用户未启用的建议只留在建议区。</span></div><div class="object-tabs"><button type="button" data-insight-view="findings" class="active">洞察</button><button type="button" data-insight-view="plans">观察计划</button></div><div id="insightFindings" class="object-list"></div><div id="observationPlans" class="object-list" hidden></div></section>
+
+      <section class="page standard-page object-page" id="page-assets" aria-label="资产目录"><div class="page-title"><div><div class="eyebrow">ASSETS / CATALOG</div><h1>资产目录</h1><p>找回过去采用的产物、业务操作结果、知识和个人工作材料，并看清保存位置与有效期。</p></div><span class="tag">组织云空间 / 个人空间</span></div><div class="object-principle"><strong>哪些需要长期保留？</strong><span>正式发布的素材与业务操作结果进入组织云空间；未采用的草稿可以限时保留。个人材料只有经授权上报后才进入组织资产。</span></div><div class="object-tabs"><button type="button" data-asset-filter="all" class="active">全部</button><button type="button" data-asset-filter="organization">组织资产</button><button type="button" data-asset-filter="personal">个人材料</button><button type="button" data-asset-filter="temporary">临时草稿</button></div><div class="asset-layout"><main class="object-list" id="assetList"></main><aside class="object-aside" id="assetDetail"></aside></div></section>
+
+      <section class="page standard-page object-page" id="page-dossier" aria-label="经营档案"><div class="page-title"><div><div class="eyebrow">DOSSIER / LONG-RUNNING WORK</div><h1>国庆活动</h1><p>由商家创建的长期经营事项，贯穿 9 月筹备、10 月执行和后续复盘。</p></div><span class="tag">商家自定义 · <span id="dossierScope">新街口店</span></span></div><div class="object-principle"><strong>档案负责“为什么做、做到哪里”</strong><span>日历负责“某天发生了什么”。档案将不同日期的 Task、洞察、正式产物和有赞业务对象连在一起。</span></div><div class="dossier-overview"><div><small>经营目标</small><strong>准备并执行国庆老客回访与备货</strong></div><div><small>档案负责人</small><strong id="dossierOwner">店主</strong></div><div><small>时间范围</small><strong>9 月筹备 → 10 月复盘</strong></div><div><small>保存规则</small><strong>确认后的产物与操作结果保留在组织云空间</strong></div></div><div class="dossier-layout"><main class="object-surface"><div class="panel-heading"><div><span class="eyebrow">TIMELINE</span><h2>这件事如何推进</h2></div><button class="text-btn" type="button" data-page="calendar">从日历回看 →</button></div><div class="dossier-timeline"><div><time>9 月 · 筹备</time><strong>商家创建国庆活动档案</strong><p>目标、预算口径、沿用的规范与去年同期资产在这里确定。</p><button class="text-btn" type="button" data-page="assets">查看去年采用的资产 →</button></div><div><time>10 / 04 · 发起</time><strong>回访和备货工作进入 Task</strong><p>原始要求、对话和业务查询都保留在各自 Task 中。</p><button class="text-btn" type="button" data-calendar-jump="4">看当天日历 →</button> <button class="text-btn" type="button" data-task="recall" id="dossierTaskRecall">打开回访 Task →</button> <button class="text-btn" type="button" data-task="stock" id="dossierTaskStock">打开备货 Task →</button></div><div><time>10 / 05 · 发现</time><strong>形成库存核验洞察与回访文案草稿</strong><p>洞察保留依据；草稿保留来源。需要商家决定是否采用。</p><button class="text-btn" type="button" data-calendar-jump="5">看当天日历 →</button> <button class="text-btn" type="button" data-page="insights">看洞察 →</button> <button class="text-btn" type="button" data-page="assets">看产物 →</button></div><div><time>之后 · 待确认</time><strong>核验营销配置并决定是否发布</strong><p>正式操作结果关联原有业务对象，进入组织云空间。</p><button class="text-btn" type="button" data-page="business" data-domain="marketing">查看营销配置 →</button></div></div></main><aside class="object-aside"><div class="eyebrow">LINKED OBJECTS</div><h2>关联内容</h2><div class="rail-item"><small>Task</small><strong>老客回访 · 国庆备货</strong></div><div class="rail-item"><small>洞察</small><strong>礼盒库存需复核 · 有来源与时间</strong></div><div class="rail-item"><small>资产</small><strong>回访文案草稿 · 确认后的执行清单</strong></div><div class="rail-item"><small>业务对象</small><strong>客户人群 · 商品库存 · 营销草稿</strong></div><button class="text-btn" type="button" data-page="calendar">查看日历中的日期节点 →</button></aside></div></section>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="移动端导航"><button type="button" data-page="home">工作</button><button type="button" data-page="tasks">Task</button><button type="button" data-page="calendar">日历</button><button type="button" data-page="insights">发现</button><button type="button" id="mobileMoreButton" aria-haspopup="dialog" aria-controls="mobileMenu">更多</button></nav>
+  <dialog class="mobile-menu" id="mobileMenu" aria-label="更多工作页面"><div class="mobile-menu-head"><strong>更多工作页面</strong><button type="button" id="closeMobileMenu" aria-label="关闭更多页面">关闭</button></div><div class="mobile-menu-group"><span>工作与资产</span><button type="button" data-page="assets">资产目录</button><button type="button" data-page="dossier">经营档案</button></div><div class="mobile-menu-group"><span>经营业务</span><button type="button" data-page="business" data-domain="customer">客户与会员</button><button type="button" data-page="business" data-domain="inventory">商品与库存</button><button type="button" data-page="business" data-domain="orders">订单与履约</button><button type="button" data-page="business" data-domain="marketing">营销与内容</button><button type="button" data-page="business" data-domain="store">门店与渠道</button><button type="button" data-page="business" data-domain="finance">财务与经营数据</button></div></dialog>
+  <dialog class="search-dialog" id="searchDialog" aria-label="搜索工作与业务"><div class="search-dialog-head"><label for="searchInput">搜索工作、业务和产物</label><button type="button" id="closeSearch" aria-label="关闭搜索">关闭</button></div><input id="searchInput" autocomplete="off" placeholder="试试：国庆、客户、备货、文案"><div id="searchResults" class="search-results"></div><p>搜索当前演示范围。正式产品还应按权限查找历史 Task、档案、产物与业务对象。</p></dialog>
+  <dialog class="search-dialog task-settings-dialog" id="taskSettingsDialog" aria-label="Task 设置"><div class="search-dialog-head"><label for="taskDomainSetting">Task 设置</label><button type="button" id="closeTaskSettings" aria-label="关闭设置">关闭</button></div><form id="taskSettingsForm" class="task-settings-form"><label>业务分类<select id="taskDomainSetting"><option value="">待分类</option><option value="customer">客户与会员</option><option value="inventory">商品与库存</option><option value="orders">订单与履约</option><option value="marketing">营销与内容</option><option value="store">门店与渠道</option><option value="finance">财务与经营数据</option></select></label><label>运行方式<select id="taskRepeatSetting"><option value="none">一次性</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option></select></label><label>具体时间与条件<input id="taskRepeatDetail" placeholder="例如：每周四 16:00 生成下周草稿"></label><label>业务变更前的确认<select id="taskApprovalSetting"><option value="required">由有权限的人确认</option><option value="draft">只生成草稿，不执行变更</option></select></label><label>关联经营档案<select id="taskDossierSetting"><option value="">不关联</option><option value="国庆活动">国庆活动</option></select></label><div class="settings-foot"><p>周期设置先由人确认。原型仅记录在当前会话，不会启动真实定时任务。</p><button class="btn primary" type="submit">保存 Task 设置</button></div></form></dialog>
+  <script>
+    const $=id=>document.getElementById(id);
+    const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const examples={
+      owner:[
+        {id:'recall',title:'召回沉默老客',status:'待确认',kind:'商家发起',scope:'新街口店',domain:'marketing',dossier:'国庆活动',updated:'今天 10:42',context:[['业务对象','客户人群、营销活动草稿'],['数据来源','本店客户与会员记录'],['经营档案','国庆活动']],entries:[
+          {type:'user',text:'先用已有客户数据准备一轮国庆老客回访。把人群和券设置给我看，正式发送前由我确认。',time:'昨天 16:18'},
+          {type:'tool',text:'已读取当前权限范围内的客户与会员记录，并核对组织触达规范。'},
+          {type:'agent',text:'我整理了候选人群和回访内容。先看圈选依据；人群、券规则与发送时间都可以调整。目前没有发送消息，也没有修改生效配置。',time:'10:42'},
+          {type:'table',title:'候选老客人群',subtitle:'圈选依据与可触达情况',columns:['筛选条件','当前样本','需核验'],rows:[['曾经购买，近期未复购','演示 37 位','最近购买时间'],['可通过企业微信触达','演示 31 位','联系权限']],source:'有赞客户与会员 · 演示读取 10:36',domain:'customer'},
+          {type:'artifact',title:'国庆老客回访文案',description:'草稿产物。正式采用后可保存至组织云空间，并关联本 Task 与国庆活动档案。',source:'Agent 草稿 · 尚未采用'},
+          {type:'decision',title:'核验优惠券与发送设置',description:'到内嵌营销业务页检查人群、券规则和排期。确认前不会执行发送。',action:'查看营销配置',domain:'marketing'}
+        ]},
+        {id:'stock',title:'核对国庆备货',status:'进行中',kind:'商家发起',scope:'新街口店',domain:'inventory',dossier:'国庆活动',updated:'今天 09:40',context:[['业务对象','商品、库存、补货建议'],['数据来源','本店可售库存与在途记录'],['经营档案','国庆活动']],entries:[
+          {type:'user',text:'国庆活动前帮我看一下商品库存。先指出需要补货的东西，不要直接创建采购单。',time:'昨天 17:10'},
+          {type:'tool',text:'已读取当前权限范围内的商品库存与在途记录。'},
+          {type:'agent',text:'节日礼盒值得先核验。我把相关库存和建议整理在下面；是否补货仍由你决定。',time:'09:40'},
+          {type:'table',title:'备货核对',subtitle:'商品可售库存与在途情况',columns:['商品','可售库存','在途','建议'],rows:[['节日礼盒','演示 18','0','复核备货量'],['经典咖啡豆','演示 42','12','继续观察']],source:'有赞商品与库存 · 演示读取 09:36',domain:'inventory'},
+          {type:'artifact',title:'国庆备货建议',description:'列出待核对商品、建议数量口径和供应商检查点；尚未生成采购单。',source:'Agent 草稿 · 可选择长期保留'},
+          {type:'decision',title:'检查原始库存后决定',description:'到商品与库存业务页核对实时数据。若要创建补货单，需要明确数量并经授权人员确认。',action:'查看商品库存',domain:'inventory'}
+        ]}
+      ],
+      hq:[
+        {id:'recall',title:'华东老客回访方案',status:'待确认',kind:'总部发起',scope:'华东区域',domain:'marketing',dossier:'国庆活动',updated:'今天 10:42',context:[['业务对象','区域营销方案、门店执行范围'],['数据来源','已授权门店的汇总记录'],['经营档案','国庆活动']],entries:[
+          {type:'user',text:'梳理华东门店的国庆老客回访方案。先看各店适用范围，统一发布前由总部确认。',time:'昨天 16:18'},
+          {type:'tool',text:'已读取总部被授权查看的门店汇总与品牌规范。'},
+          {type:'agent',text:'门店执行范围需要先确认。我列出了当前样本，并把统一话术保存为草稿；尚未向门店发布。',time:'10:42'},
+          {type:'table',title:'门店执行范围',subtitle:'已授权门店的活动状态',columns:['门店','活动状态','需确认'],rows:[['新街口店','草稿','人群范围'],['江宁店','待领取','接棒人']],source:'有赞营销配置 · 演示读取 10:36',domain:'marketing'},
+          {type:'artifact',title:'华东国庆回访执行清单',description:'统一素材与各店待确认项的草稿。采用后进入组织云空间。',source:'Agent 草稿 · 尚未发布'},
+          {type:'decision',title:'核对门店范围与统一素材',description:'在营销业务页查看原有配置，再决定是否提交审批。',action:'查看营销配置',domain:'marketing'}
+        ]},
+        {id:'stock',title:'核对华东门店备货',status:'进行中',kind:'总部发起',scope:'华东区域',domain:'inventory',dossier:'国庆活动',updated:'今天 09:40',context:[['业务对象','门店商品库存、备货建议'],['数据来源','已授权门店的库存汇总'],['经营档案','国庆活动']],entries:[
+          {type:'user',text:'看一下华东区域国庆备货情况，先找需要区域经理核实的门店，不要替门店下单。',time:'昨天 17:10'},
+          {type:'tool',text:'已读取当前总部账号有权查看的门店库存汇总。'},
+          {type:'agent',text:'下面是需要复核的门店样本。细节以各门店实时库存为准；我尚未建立任何采购单。',time:'09:40'},
+          {type:'table',title:'区域备货核对',subtitle:'各门店备货与责任角色',columns:['门店','商品','状态','接棒人'],rows:[['新街口店','节日礼盒','建议复核','店长'],['江宁店','经典咖啡豆','在途核验','区域经理']],source:'有赞商品与库存 · 演示读取 09:36',domain:'inventory'},
+          {type:'artifact',title:'华东备货跟进清单',description:'列出门店核验点与责任角色的草稿，待总部确认后才进入组织云空间。',source:'Agent 草稿 · 尚未采用'},
+          {type:'decision',title:'回到库存记录核验',description:'查看门店可见的商品库存，再决定是否分派任务给区域经理。',action:'查看商品库存',domain:'inventory'}
+        ]}
+      ],
+      staff:[
+        {id:'recall',title:'国庆门店交接',status:'今日待办',kind:'店长分派',scope:'新街口店 · 个人',domain:'store',dossier:'国庆活动',updated:'今天 08:20',context:[['我的班次','早班 09:00–17:00'],['任务来源','店长交接要求'],['业务范围','本人可见的门店事项']],entries:[
+          {type:'user',text:'店长交接：早班先核对活动物料，再确认晚班需要继续处理的事项。',time:'昨天 18:00'},
+          {type:'agent',text:'我把今天班次内要处理的交接事项列出来了。你可以补充现场情况；涉及发布或修改配置仍需店长确认。',time:'今天 08:20'},
+          {type:'artifact',title:'今日交接记录',description:'个人工作记录；提交给店长后才进入组织云空间。',source:'个人草稿 · 待上报'}
+        ]},
+        {id:'stock',title:'核对节日礼盒货架',status:'进行中',kind:'店长分派',scope:'新街口店 · 个人',domain:'inventory',dossier:'国庆活动',updated:'今天 09:05',context:[['业务对象','节日礼盒'],['任务来源','店长分派'],['权限','仅查看授权商品与提交核对结果']],entries:[
+          {type:'user',text:'请现场核对节日礼盒货架数量，并拍照上报；不要直接调整库存。',time:'昨天 18:05'},
+          {type:'agent',text:'请按门店规范核对货架和仓库。原型可以记录你的说明，正式库存调整需由有权限的人员处理。',time:'今天 09:05'}
+        ]}
+      ]
+    };
+    const homeExamples={
+      owner:{
+        progress:{recall:['昨天提出人群与券设置要求；今天 Agent 给出了候选人群和回访草稿。','下一步：核验人群、券规则和发送时间','高优先级 · 等待你的决定'],stock:['昨天发起国庆备货核对；今天已整理库存与在途记录。','下一步：到商品页复核礼盒库存，再决定是否补货','今日跟进 · 先核验数据']},
+        yesterday:['昨天已开始国庆老客回访与备货核对。两项工作都留在国庆活动档案中，今天可以直接接续。','recall'],
+        messages:[['Task 进度','老客回访方案等待你核验','来自「召回沉默老客」 · 今天 10:42','recall'],['Task 进度','国庆备货建议已整理','来自「核对国庆备货」 · 今天 09:40','stock']],
+        observation:['节日礼盒库存需要复核','演示观察：每日库存检查已由商家启用；建议先核对实时可售库存。','有赞商品与库存 · 演示读取 08:30','stock'],
+        days:[
+          {name:'周日',date:'04',hint:'昨天',notes:[['提出回访要求',false],['发起备货核对',false]],items:[['回顾老客回访的原始要求','国庆活动 · 客户与会员','recall'],['查看备货核对的起点','国庆活动 · 商品与库存','stock']]},
+          {name:'周一',date:'05',hint:'今天',notes:[['回访券待确认',true],['礼盒库存复核',false]],items:[['确认老客回访的人群与券规则','等待你决定 · 高优先级 · 关联国庆活动','recall'],['核对节日礼盒可售库存','先看原始商品记录，再决定是否补货','stock']]},
+          {name:'周二',date:'06',hint:'明天',notes:[['活动配置检查',false]],items:[['检查已确认方案的营销配置','计划节点 · 如尚未确认，先回到 Task 讨论','recall']]},
+          {name:'周三',date:'07',hint:'',notes:[['经营情况回看',false]],items:[['回看国庆活动执行情况','计划节点 · 以届时有赞业务数据为准','recall']]},
+          {name:'周四',date:'08',hint:'',notes:[],items:[]},
+          {name:'周五',date:'09',hint:'',notes:[['阶段复盘',false]],items:[['整理国庆活动阶段复盘','回到活动档案，汇总 Task 与正式产物','recall']]},
+          {name:'周六',date:'10',hint:'',notes:[],items:[]}
+        ]
+      },
+      hq:{
+        progress:{recall:['昨天发起华东门店老客回访；今天已整理门店范围与统一话术草稿。','下一步：核对适用门店和统一素材，再决定是否分派','高优先级 · 等待总部确认'],stock:['昨天提出区域备货核对；今天已圈出需复核门店。','下一步：查看门店原始库存，再交给区域经理核验','今日跟进 · 等待区域接棒']},
+        yesterday:['昨天总部启动了华东国庆活动的回访与备货检查。工作记录和正式确认项会归入组织档案。','recall'],
+        messages:[['区域交接','区域经理请求核对门店执行范围','来自华东区域 · 关联老客回访 Task','recall'],['门店反馈','新街口店反馈礼盒备货待复核','来自门店 · 关联区域备货 Task','stock']],
+        observation:['门店备货状态值得关注','演示观察：区域备货检查已由总部启用；当前样本建议向门店核实。','已授权门店库存汇总 · 演示读取 08:30','stock'],
+        days:[
+          {name:'周日',date:'04',hint:'昨天',notes:[['发起区域方案',false],['备货检查',false]],items:[['回顾区域回访方案的原始要求','总部发起 · 华东区域','recall'],['回顾区域备货检查','总部发起 · 华东区域','stock']]},
+          {name:'周一',date:'05',hint:'今天',notes:[['门店范围待确认',true],['区域备货核对',false]],items:[['确认华东门店活动范围','等待总部决定 · 高优先级','recall'],['分派门店备货核验','先核对门店状态，再交给区域经理','stock']]},
+          {name:'周二',date:'06',hint:'明天',notes:[['区域素材检查',false]],items:[['检查统一素材与门店差异','计划节点 · 关联国庆活动档案','recall']]},
+          {name:'周三',date:'07',hint:'',notes:[['门店执行回看',false]],items:[['回看各店执行状态','计划节点 · 以届时有赞业务数据为准','recall']]},
+          {name:'周四',date:'08',hint:'',notes:[],items:[]},
+          {name:'周五',date:'09',hint:'',notes:[['区域阶段复盘',false]],items:[['整理华东国庆活动阶段复盘','汇总门店反馈、Task 与正式产物','recall']]},
+          {name:'周六',date:'10',hint:'',notes:[],items:[]}
+        ]
+      },
+      staff:{
+        progress:{recall:['昨天店长留下了国庆活动的早晚班交接要求。','下一步：处理本班次物料核对，并把结果上报店长','我的早班 · 店长分派'],stock:['昨天收到节日礼盒货架核对任务。','下一步：现场核对并提交记录；不直接改库存','今日执行 · 商品与库存']},
+        yesterday:['昨天店长安排了国庆门店交接与礼盒核对。今天的早班任务已与班次关联。','recall'],
+        messages:[['店长交接','早班先核对国庆活动物料','来自店长 · 今日 09:00 开始','recall'],['分派任务','核对节日礼盒货架','来自店长 · 完成后提交结果','stock']],
+        observation:['礼盒库存变化待店长核验','这是门店已启用的库存观察。店员可以查看被分派的核对事项，无权修改库存。','有赞商品与库存 · 演示读取 08:30','stock'],
+        days:[
+          {name:'周日',date:'04',hint:'昨天',notes:[['店长交接',false]],items:[['回看店长交接要求','个人可见 · 国庆活动','recall']]},
+          {name:'周一',date:'05',hint:'今天',notes:[['早班 09–17',false],['货架核对',true]],items:[['完成早班交接','09:00–17:00 · 新街口店','recall'],['现场核对节日礼盒货架','店长分派 · 不直接调整库存','stock']]},
+          {name:'周二',date:'06',hint:'明天',notes:[['休息',false]],items:[]},
+          {name:'周三',date:'07',hint:'',notes:[['晚班 13–21',false]],items:[['查看晚班交接','13:00–21:00 · 新街口店','recall']]},
+          {name:'周四',date:'08',hint:'',notes:[],items:[]},
+          {name:'周五',date:'09',hint:'',notes:[],items:[]},
+          {name:'周六',date:'10',hint:'',notes:[],items:[]}
+        ]
+      }
+    };
+    const businessNames={customer:'客户与会员',inventory:'商品与库存',orders:'订单与履约',marketing:'营销与内容',store:'门店与渠道',finance:'财务与经营数据'};
+    const findings=[
+      {id:'stock',title:'节日礼盒库存需要复核',domain:'inventory',summary:'演示库存记录显示可售数量和活动计划需要重新核对。先看原始记录，再决定是否调整备货。',source:'已启用的每日库存观察 · 有赞商品与库存 · 10 / 05 08:30',basis:'当前可售记录、在途记录与国庆活动备货要求',target:'stock',roles:['owner','hq','staff']},
+      {id:'loyalty',title:'老客回访人群值得重新圈选',domain:'customer',summary:'候选人群已经整理，但最近购买时间与可触达权限仍需人工核验。',source:'商家发起的回访 Task · 有赞客户与会员 · 10 / 05 10:36',basis:'客户购买与联系权限记录；不自动发送消息',target:'recall',roles:['owner','hq']}
+    ];
+    const assets=[
+      {id:'lastyear',title:'去年国庆活动执行清单',kind:'正式产物',storage:'organization',domain:'marketing',validity:'历史参考 · 使用前复核',source:'去年国庆活动档案 · 组织确认版',link:'国庆活动',task:'recall',roles:['owner','hq'],description:'保留当时采用的活动要求与执行结果，帮助今年筹备时回看。历史数据口径以当时记录为准。'},
+      {id:'copy',title:'国庆老客回访文案',kind:'Agent 草稿',storage:'temporary',domain:'marketing',validity:'建议 14 天内确认去留',source:'召回沉默老客 Task · 10 / 05',link:'国庆活动',task:'recall',roles:['owner','hq'],description:'尚未采用、未发送。确认采用后进入组织云空间；否则按草稿保留策略清理。'},
+      {id:'roimemory',title:'活动 ROI 计算口径建议',kind:'记忆候选',storage:'temporary',domain:'finance',validity:'负责人核验前不可用于正式报表',source:'历史报告与经营分析 Task · 待核验',link:'国庆活动',task:'recall',roles:['owner','hq'],description:'Agent 从历史材料中提出的口径建议。需核对分母、退款、优惠券成本和统计周期，再决定是否纳入团队知识。'},
+      {id:'stockrule',title:'节日礼盒备货核对口径',kind:'团队知识',storage:'organization',domain:'inventory',validity:'下次活动前复核',source:'店长规范与上次确认记录',link:'国庆活动',task:'stock',roles:['owner','hq'],description:'说明可售、在途与货架数量如何核对。作为组织知识使用前需由负责人确认版本。'},
+      {id:'handover',title:'今日早班交接记录',kind:'个人工作记录',storage:'personal',domain:'store',validity:'本周内处理',source:'国庆门店交接 Task · 个人填写',link:'国庆活动',task:'recall',roles:['staff'],description:'只在本人空间。提交给店长并被采用后，相关部分才进入组织云空间。'},
+      {id:'shelf',title:'节日礼盒货架核对材料',kind:'现场草稿',storage:'temporary',domain:'inventory',validity:'任务结束后确认去留',source:'核对节日礼盒货架 Task',link:'国庆活动',task:'stock',roles:['staff'],description:'现场核对材料的占位示例。未经提交和确认，不作为正式库存记录。'}
+    ];
+    const observationEnabled={owner:{inventory:true,loyalty:false,patrol:false},hq:{inventory:true,loyalty:false,patrol:false},staff:{inventory:true,loyalty:false,patrol:false}};
+    let role='owner',page='home',taskId='recall',domain='marketing',selectedDay=1,businessFromTask=false,insightView='findings',assetFilter='all',selectedAsset='lastyear',calendarFilter='all',calendarDay=5,taskFilter='all';
+    const tasks=()=>examples[role];
+    const task=()=>tasks().find(item=>item.id===taskId)||tasks()[0];
+    const isPhoneLayout=()=>window.matchMedia('(max-width:650px), (max-width:900px) and (pointer:coarse) and (orientation:landscape)').matches;
+    const referenceCategories=[['all','全部'],['task','Task / 对话'],['message','组织消息'],['page','页面'],['dossier','经营档案'],['knowledge','组织 / 个人知识'],['asset','历史产物'],['business','业务数据'],['skill','Skill']];
+    const referenceDrafts={};
+    let referenceCategory='all',referenceFileSequence=0;
+    const draftKey=()=>role+':'+task().id;
+    const draftReferences=()=>referenceDrafts[draftKey()]||(referenceDrafts[draftKey()]=[]);
+    const referenceTypeName=type=>({task:'Task',message:'消息',page:'页面',dossier:'档案',knowledge:'知识',asset:'资产',business:'数据',skill:'Skill',file:'文件'}[type]||'引用');
+    function referenceCatalog(){
+      const scope=role==='hq'?'华东已授权门店':role==='staff'?'我的门店与个人范围':'新街口店';
+      const taskItems=tasks().filter(item=>item.id!==task().id).map(item=>({id:'task:'+item.id,type:'task',title:item.title,meta:'历史对话与产物 · '+item.scope}));
+      const assetItems=assets.filter(item=>item.roles.includes(role)).map(item=>({id:'asset:'+item.id,type:'asset',title:item.title,meta:(item.storage==='organization'?'组织云空间':item.storage==='personal'?'个人空间':'临时资产')+' · '+item.validity}));
+      const businessItems=Object.entries(businessNames).filter(([id])=>role!=='staff'||['inventory','store'].includes(id)).map(([id,name])=>({id:'business:'+id,type:'business',title:name,meta:'业务页 / 数据表 · '+scope+' · 使用时重新校验权限'}));
+      const knowledgeItems=role==='staff'?
+        [{id:'knowledge:handover',type:'knowledge',title:'门店交接规范 v2',meta:'组织制度 · 当前门店可见'},{id:'knowledge:personal',type:'knowledge',title:'我的早班工作笔记',meta:'个人知识 · 仅本人可见'}]:
+        [{id:'knowledge:promotion',type:'knowledge',title:'促销活动审批规范 v3',meta:'组织制度 · 已授权范围'},{id:'knowledge:personal',type:'knowledge',title:'我的经营分析口径笔记',meta:'个人知识 · 仅本人可见'}];
+      return [...taskItems,{id:'message:holiday',type:'message',title:role==='staff'?'店长：今日交接提醒':'国庆备货进度同步',meta:'已授权组织消息 · 演示来源 · 接入后保留会话与原文引用'},{id:'page:business:'+domain,type:'page',title:'最近查看：'+businessNames[domain],meta:'业务标签页 · '+scope+' · 运行时读取当前数据'},{id:'dossier:holiday',type:'dossier',title:'国庆活动',meta:'经营档案 · 当前可见节点 · Task / 产物 / 业务对象'},...knowledgeItems,...assetItems,...businessItems,{id:'skill:analysis',type:'skill',title:'经营数据核验',meta:'Skill · 查询前检查数据范围和指标口径'},{id:'skill:files',type:'skill',title:'文件分析与报告',meta:'Skill · PDF / PPT / Excel 处理'},{id:'skill:roster',type:'skill',title:'班表草稿',meta:'Skill · 生成草稿后由授权人员确认'}];
+    }
+    function renderComposerReferences(){
+      const refs=draftReferences();
+      $('composerScope').textContent='当前 Task：'+task().title+' · '+(role==='hq'?'总部运营':role==='staff'?'门店店员':'店主')+' · 引用只加入本次输入';
+      $('referenceChips').hidden=refs.length===0;
+      $('referenceChips').innerHTML=refs.map(item=>'<span class="composer-reference"><b>'+escapeHtml(referenceTypeName(item.type))+'</b><span title="'+escapeHtml(item.meta)+'">'+escapeHtml(item.title)+'</span><button type="button" data-remove-ref="'+escapeHtml(item.id)+'" aria-label="移除 '+escapeHtml(item.title)+'">×</button></span>').join('');
+    }
+    function renderReferencePicker(){
+      $('referenceTabs').innerHTML=referenceCategories.map(([id,label])=>'<button type="button" class="'+(referenceCategory===id?'active':'')+'" data-ref-category="'+id+'">'+label+'</button>').join('');
+      const query=$('referenceSearch').value.trim().toLowerCase();
+      const selected=new Set(draftReferences().map(item=>item.id));
+      const found=referenceCatalog().filter(item=>(referenceCategory==='all'||item.type===referenceCategory)&&(!query||(item.title+' '+item.meta).toLowerCase().includes(query)));
+      $('referenceResults').innerHTML=found.length?found.map(item=>'<button class="reference-result" type="button" data-ref-id="'+escapeHtml(item.id)+'"><strong>'+escapeHtml(item.title)+(selected.has(item.id)?' · 已引用':'')+'</strong><span>'+escapeHtml(referenceTypeName(item.type))+' · '+escapeHtml(item.meta)+'</span></button>').join(''):'<div class="reference-empty">当前角色可引用的范围里没有匹配内容。</div>';
+    }
+    function setReferencePicker(open,category){
+      if(category)referenceCategory=category;
+      $('referencePicker').hidden=!open;
+      $('addReferenceButton').setAttribute('aria-expanded',String(open));
+      if(open){renderReferencePicker();$('referenceSearch').focus();}
+    }
+    function addDraftReference(item){
+      const refs=draftReferences();
+      if(!refs.some(ref=>ref.id===item.id))refs.push({...item});
+      renderComposerReferences();
+      setReferencePicker(false);
+      $('taskInput').focus();
+    }
+    const pageNames={home:'工作首页',tasks:'全部 Task',task:'Task',business:'经营业务',calendar:'经营日历',insights:'洞察与观察',assets:'资产目录',dossier:'经营档案'};
+    function renderEntry(entry){
+      if(entry.type==='user') return `<div class="event user"><div class="event-label"><strong>你</strong><span>${escapeHtml(entry.time||'刚刚')}</span></div><p>${escapeHtml(entry.text)}</p></div>`;
+      if(entry.type==='agent') return `<div class="event agent"><div class="event-label"><strong>经营 Agent</strong><span>${escapeHtml(entry.time||'刚刚')}</span></div><p>${escapeHtml(entry.text)}</p></div>`;
+      if(entry.type==='tool') return `<div class="tool-line">${escapeHtml(entry.text)}</div>`;
+      if(entry.type==='table') return `<div class="result-card"><div class="result-head"><div><strong>${escapeHtml(entry.title)}</strong><small>${escapeHtml(entry.subtitle)}</small></div><span class="tag">数据</span></div><div class="result-body table-wrap"><table class="data-table"><thead><tr>${entry.columns.map(cell=>`<th>${escapeHtml(cell)}</th>`).join('')}</tr></thead><tbody>${entry.rows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="result-foot"><span>${escapeHtml(entry.source)}</span><button class="text-btn" type="button" data-page="business" data-domain="${escapeHtml(entry.domain)}">查看原始业务页</button></div></div>`;
+      if(entry.type==='artifact') return `<div class="result-card"><div class="result-head"><div><strong>${escapeHtml(entry.title)}</strong><small>产物 · 可与 Task、档案及业务对象关联</small></div><span class="tag good">草稿</span></div><div class="artifact-body"><p>${escapeHtml(entry.description)}</p><div class="artifact-meta"><span class="tag">${escapeHtml(entry.source)}</span><span class="tag">未执行真实业务操作</span></div></div></div>`;
+      if(entry.type==='decision') return `<div class="result-card"><div class="result-head"><div><strong>${escapeHtml(entry.title)}</strong><small>下一项决定 · 无固定步骤数</small></div><span class="tag warn">待核验</span></div><div class="decision-body"><p>${escapeHtml(entry.description)}</p><button class="btn" type="button" data-page="business" data-domain="${escapeHtml(entry.domain)}">${escapeHtml(entry.action)}</button></div></div>`;
+      return '';
+    }
+    function renderTasks(){
+      $('sidebarTasks').innerHTML=tasks().map(item=>`<button class="task-link ${page==='task'&&taskId===item.id?'active':''}" type="button" data-task="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.status)} · ${escapeHtml(item.updated)}</small></button>`).join('');
+    }
+    function renderTasksIndex(){
+      document.querySelectorAll('[data-task-filter]').forEach(button=>button.classList.toggle('active',button.dataset.taskFilter===taskFilter));
+      const visible=tasks().filter(item=>taskFilter==='all'||(taskFilter==='recurring'?item.repeat&&item.repeat!=='none':item.status!=='已完成'));
+      $('taskIndexList').innerHTML=visible.length?visible.map(item=>`<article class="object-card"><div><span class="tag">${escapeHtml(businessNames[item.domain]||'待分类')}</span> <span class="tag ${item.repeatConfirmed?'good':item.repeat&&item.repeat!=='none'?'warn':''}">${escapeHtml(item.repeat&&item.repeat!=='none'?(item.repeatConfirmed?'周期运行已确认':'周期待确认'):'一次性')}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.status)} · ${escapeHtml(item.scope)} · ${escapeHtml(item.updated)}</p><div class="object-meta">${escapeHtml(item.repeatDetail||'在 Task 中查看要求、过程与下一步')}${item.dossier?` · 关联${escapeHtml(item.dossier)}`:''}</div></div><div class="object-actions"><button type="button" data-task="${escapeHtml(item.id)}">继续 Task →</button></div></article>`).join(''):'<div class="today-empty">当前筛选下没有 Task。可以从这里新建一项工作。</div>';
+    }
+    function renderHome(){
+      const content=homeExamples[role];
+      $('weekStrip').innerHTML=content.days.map((day,index)=>`<button type="button" class="week-day ${selectedDay===index?'selected':''}" data-day-index="${index}" aria-pressed="${selectedDay===index}"><span class="day-meta"><b>${escapeHtml(day.name)}</b><span>${escapeHtml(day.hint)}</span></span><span class="day-num">${escapeHtml(day.date)}</span>${day.notes.length?day.notes.map(([note,urgent])=>`<span class="day-note ${urgent?'urgent':''}">${escapeHtml(note)}</span>`).join(''):'<span class="day-note">暂无已安排事项</span>'}</button>`).join('');
+      $('homeRecent').innerHTML=tasks().slice(0,3).map((item,index)=>{const detail=content.progress[item.id]||(item.entries.length?['这项工作刚刚创建，要求已留在 Task 中。','下一步：打开 Task，补充目标和需要的数据','新建 Task']:['这项工作尚未描述目标。','下一步：打开 Task，输入要完成的工作','新建 Task']);return `<article class="continue-row ${index?'secondary':''}"><div><div class="row-tags"><span class="tag ${item.status==='待确认'?'warn':'good'}">${escapeHtml(item.status)}</span><span class="tag">${escapeHtml(businessNames[item.domain]||'待分类')}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(detail[0])}</p><p class="next-line">${escapeHtml(detail[1])}</p></div><div class="row-action"><button class="btn ${index?'':'primary'}" type="button" data-task="${escapeHtml(item.id)}">继续 Task →</button></div><div class="row-foot"><span>${escapeHtml(detail[2])}</span><span>${escapeHtml(item.scope)}</span><span>${escapeHtml(item.dossier?'关联'+item.dossier:'尚未归入档案')}</span></div></article>`}).join('');
+      const day=content.days[selectedDay];
+      $('selectedDayTitle').textContent=selectedDay===1?'今天要处理':`10 月 ${Number(day.date)} 日的工作`;
+      $('todayCount').textContent=selectedDay===1?'按到期、协作等待和置顶排列':`${day.items.length} 项已安排工作 · 点击可接续 Task`;
+      $('todayWork').innerHTML=day.items.length?day.items.map(([title,description,target],index)=>`<div class="today-item"><span class="item-index">${String(index+1).padStart(2,'0')}</span><div><strong>${escapeHtml(title)}</strong><small>${escapeHtml(description)}</small></div><button class="text-btn" type="button" data-task="${escapeHtml(target)}">打开 →</button></div>`).join(''):'<div class="today-empty">这一天没有已安排的工作。未定日期的 Task 仍可从左侧或“接着做”找回。</div>';
+      $('yesterdaySummary').innerHTML=`<div class="summary-body"><strong>从昨天接续</strong><p>${escapeHtml(content.yesterday[0])}</p><button class="text-btn" type="button" data-task="${escapeHtml(content.yesterday[1])}">看昨天的工作记录 →</button></div>`;
+      $('messageList').innerHTML=content.messages.map(([kind,title,meta,target])=>`<div class="signal-item"><span class="tag">${escapeHtml(kind)}</span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(meta)}</small><button class="text-btn" type="button" data-task="${escapeHtml(target)}">进入相关 Task →</button></div>`).join('');
+      $('observationList').innerHTML=`<div class="signal-item observation"><strong>${escapeHtml(content.observation[0])}</strong><small>${escapeHtml(content.observation[1])}</small><small>${escapeHtml(content.observation[2])}</small><button class="text-btn" type="button" data-page="insights">查看洞察与依据 →</button></div>${observationEnabled[role].loyalty?'<div class="signal-item"><strong>每周老客变化观察已启用</strong><small>下一次运行后，新发现会出现在洞察页。</small></div>':''}${observationEnabled[role].patrol?'<div class="signal-item"><strong>经营巡查已启用</strong><small>按照商家确认的范围运行，发现会说明来源。</small></div>':''}`;
+      $('shiftShortcut').hidden=role!=='staff';
+      $('notificationCount').textContent=String(content.messages.length);
+      $('inboxCount').textContent=String(content.messages.length);
+    }
+    function renderInsights(){
+      document.querySelectorAll('[data-insight-view]').forEach(button=>button.classList.toggle('active',button.dataset.insightView===insightView));
+      $('insightFindings').hidden=insightView!=='findings';
+      $('observationPlans').hidden=insightView!=='plans';
+      $('insightFindings').innerHTML=findings.filter(item=>item.roles.includes(role)).map(item=>`<article class="object-card"><div><span class="tag">${escapeHtml(businessNames[item.domain])}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.summary)}</p><div class="object-meta">依据：${escapeHtml(item.basis)}<br>发现来源：${escapeHtml(item.source)} · 关联国庆活动</div></div><div class="object-actions"><button type="button" data-task="${escapeHtml(item.target)}">查看相关 Task</button>${role==='staff'?'':`<button type="button" class="primary-action" data-insight-task="${escapeHtml(item.id)}">作为新 Task 处理</button>`}</div></article>`).join('');
+      const plans=[{id:'inventory',title:'每日库存观察',domain:'inventory',scope:role==='hq'?'华东已授权门店':'新街口店',frequency:'每日 08:30',origin:'商家已启用 · 商品与库存数据'},{id:'loyalty',title:'每周老客变化观察',domain:'customer',scope:role==='hq'?'华东已授权门店':'新街口店',frequency:'每周一 09:00',origin:'系统推荐 · 尚待商家启用'},{id:'patrol',title:'经营巡查关注点',domain:'store',scope:role==='hq'?'华东已授权门店':'新街口店',frequency:'每周二 08:00',origin:'产品建议关注库存、订单与外部变化 · 尚待商家确认'}];
+      $('observationPlans').innerHTML=plans.filter(item=>role!=='staff'||item.id==='inventory').map(item=>{const enabled=observationEnabled[role][item.id];return `<article class="object-card"><div><span class="tag ${enabled?'good':''}">${enabled?'已启用':'未启用 · 推荐'}</span><h2>${escapeHtml(item.title)}</h2><p>关注范围：${escapeHtml(item.scope)} · 运行频率：${escapeHtml(item.frequency)}</p><div class="object-meta">来源：${escapeHtml(item.origin)}<br>每次运行留下时间、读取范围与发现依据；有发现才生成洞察，不自动创建待办。</div></div><div class="object-actions">${role==='staff'?'<span class="tag">仅查看</span>':`<button type="button" data-observation-toggle="${escapeHtml(item.id)}">${enabled?'暂停观察':'启用观察'}</button>`}</div></article>`}).join('');
+    }
+    function renderAssets(){
+      document.querySelectorAll('[data-asset-filter]').forEach(button=>button.classList.toggle('active',button.dataset.assetFilter===assetFilter));
+      const visible=assets.filter(item=>item.roles.includes(role)&&(assetFilter==='all'||item.storage===assetFilter));
+      if(!visible.some(item=>item.id===selectedAsset))selectedAsset=visible[0]?.id||'';
+      $('assetList').innerHTML=visible.length?visible.map(item=>`<button class="asset-row ${selectedAsset===item.id?'active':''}" type="button" data-asset="${escapeHtml(item.id)}"><span class="tag">${escapeHtml(item.kind)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.storage==='organization'?'组织云空间':item.storage==='personal'?'个人空间':'临时保留')} · ${escapeHtml(businessNames[item.domain])} · ${escapeHtml(item.validity)}</small><p>${escapeHtml(item.source)}</p></button>`).join(''):'<div class="today-empty">当前筛选下没有可见资产。</div>';
+      const current=assets.find(item=>item.id===selectedAsset&&item.roles.includes(role));
+      $('assetDetail').innerHTML=current?`<span class="eyebrow">ASSET DETAIL</span><h2>${escapeHtml(current.title)}</h2><p>${escapeHtml(current.description)}</p><div class="rail-item"><small>保存位置</small><strong>${escapeHtml(current.storage==='organization'?'组织云空间':current.storage==='personal'?'个人空间':'临时保留')}</strong></div><div class="rail-item"><small>有效性</small><strong>${escapeHtml(current.validity)}</strong></div><div class="rail-item"><small>来源与关联</small><strong>${escapeHtml(current.source)} · ${escapeHtml(current.link)}</strong></div>${current.storage!=='organization'?`<div class="rail-item"><small>保留决定</small><strong>${current.retentionRequest?'已提出申请 · 待负责人确认':'尚未长期保留'}</strong>${current.retentionRequest?'':`<button class="btn" type="button" data-asset-request="${escapeHtml(current.id)}">${role==='staff'?'上报给店长':'提出长期保留'}</button>`}</div>`:''}<button class="text-btn" type="button" data-task="${escapeHtml(current.task)}">回到来源 Task →</button><br><button class="text-btn" type="button" data-page="dossier">查看关联经营档案 →</button>`:'<span class="eyebrow">ASSET DETAIL</span><p>选择一个资产查看来源、保存位置和关联对象。</p>';
+    }
+    function renderSearch(){
+      const query=$('searchInput').value.trim().toLowerCase();
+      const taskResults=tasks().map(item=>({title:item.title,meta:`Task · ${item.status} · ${item.scope}`,target:`data-task="${escapeHtml(item.id)}"`,search:`${item.title} ${item.dossier||''} ${businessNames[item.domain]||''}`}));
+      const artifactResults=tasks().flatMap(item=>item.entries.filter(entry=>entry.type==='artifact').map(entry=>({title:entry.title,meta:`产物 · 关联 Task「${item.title}」`,target:`data-task="${escapeHtml(item.id)}"`,search:`${entry.title} ${item.title} ${entry.description}`})));
+      const businessResults=Object.entries(businessNames).filter(([id])=>role!=='staff'||['inventory','store'].includes(id)).map(([id,name])=>({title:name,meta:'内嵌业务页面 · 查看数据与操作位置',target:`data-page="business" data-domain="${id}"`,search:name}));
+      const assetResults=assets.filter(item=>item.roles.includes(role)).map(item=>({title:item.title,meta:`资产 · ${item.kind} · ${item.validity}`,target:`data-asset="${item.id}"`,search:`${item.title} ${item.kind} ${item.source}`}));
+      const all=[...taskResults,...assetResults,...artifactResults,{title:'国庆活动',meta:'经营档案 · Task、洞察、资产与业务对象',target:'data-page="dossier"',search:'国庆活动 日历 档案'},{title:'洞察与观察',meta:'发现依据与持续关注规则',target:'data-page="insights"',search:'洞察 观察 线索 库存'},{title:'创建周期性 Task',meta:'例如每周生成班表草稿，再由授权人员确认',target:'data-create-prompt="每周四 16:00 生成下周班表草稿，店长确认后再发布"',search:'排班 班次 每周 周期 创建'},...businessResults];
+      const found=all.filter(item=>!query||item.search.toLowerCase().includes(query)).slice(0,12);
+      $('searchResults').innerHTML=found.length?found.map(item=>`<button type="button" ${item.target}><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.meta)}</span></button>`).join(''):'<div class="today-empty">当前演示范围没有找到匹配项。</div>';
+    }
+    function renderTask(){
+      const current=task();
+      renderComposerReferences();
+      $('taskTitle').textContent=current.title;
+      $('taskSubline').innerHTML=`<span class="tag ${current.status==='待确认'?'warn':'good'}">${escapeHtml(current.status)}</span><span class="tag">${escapeHtml(current.scope)}</span><span class="tag">${escapeHtml(current.kind)}</span><span class="tag">${escapeHtml(businessNames[current.domain]||'待分类')}</span>${current.repeat&&current.repeat!=='none'?`<span class="tag ${current.repeatConfirmed?'good':'warn'}">${current.repeatConfirmed?'周期已确认':'周期待确认'}</span>`:''}${current.dossier?`<span class="tag">关联${escapeHtml(current.dossier)}</span>`:''}`;
+      $('taskFeed').innerHTML=current.entries.length?current.entries.map(renderEntry).join(''):'<div class="today-empty">先描述这项工作的目标。可以提出一次性问题，也可以要求定期生成草稿；周期和确认规则随后在 Task 设置中核对。</div>';
+      $('taskContext').innerHTML=current.context.map(([label,value])=>`<div class="rail-item"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></div>`).join('');
+      $('taskSettingsSummary').innerHTML=`<div class="rail-item"><small>运行方式</small><strong>${escapeHtml(current.repeat&&current.repeat!=='none'?({daily:'每天',weekly:'每周',monthly:'每月'}[current.repeat]||'周期性')+(current.repeatConfirmed?' · 已确认':' · 待确认'):'一次性')}</strong></div>${current.repeatDetail?`<div class="rail-item"><small>时间与条件</small><strong>${escapeHtml(current.repeatDetail)}</strong></div>`:''}<div class="rail-item"><small>业务变更</small><strong>${current.approval==='draft'?'只生成草稿':'授权人员确认后执行'}</strong></div>`;
+      $('taskBusinessButton').textContent=current.domain==='inventory'?'查看商品库存':'查看相关业务';
+      $('taskBusinessButton').hidden=!current.domain;
+      $('railBusinessButton').hidden=!current.domain;
+      if(page==='task') $('taskFeed').scrollTop=0;
+    }
+    function renderBusiness(){
+      $('businessContext').textContent=`来自 Task「${task().title}」 · 当前角色：${role==='owner'?'店主':role==='hq'?'总部运营':'门店店员'}`;
+      $('businessContextStrip').hidden=!businessFromTask;
+      $('businessHelpBack').hidden=!businessFromTask;
+      $('businessHelpTitle').textContent=businessFromTask?'在业务页继续核验':'从业务对象开始';
+      $('businessHelpText').textContent=businessFromTask?'查看原始记录、核对变更，再回到 Task 决定下一步。':'选择当前范围内的业务对象，查看数据与配置；需要分析或处理时可发起 Task。';
+      $('customerScope').textContent=role==='hq'?'华东区域 · 已授权门店':'新街口店';
+      $('orderScope').textContent=role==='hq'?'华东区域 · 已授权门店订单':'新街口店 · 授权范围';
+      $('storeScope').textContent=role==='hq'?'华东区域 · 已授权门店':'新街口店';
+      $('storeRoster').textContent=role==='staff'?'我的已发布班次 · 新街口店':role==='hq'?'已授权门店的已发布班表':'本周已发布班表 · 新街口店';
+      const customerRows=role==='owner'?[['沉默老客','曾购买，近期未复购','10:36','待核验'],['节前活跃会员','近期有互动','10:36','可查看']]:[['新街口店','老客回访人群','10:36','待核验'],['江宁店','会员活跃人群','10:36','可查看']];
+      const inventoryRows=role==='owner'?[['节日礼盒','演示 18','0','建议复核'],['经典咖啡豆','演示 42','12','正常']]:[['新街口店 · 节日礼盒','演示 18','0','建议复核'],['江宁店 · 咖啡豆','演示 42','12','正常']];
+      $('customerRows').innerHTML=customerRows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
+      $('inventoryRows').innerHTML=inventoryRows.map(row=>`<tr>${row.map(cell=>`<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
+      $('inventoryActions').textContent=role==='owner'?'调整预警阈值 · 创建补货单 · 核验供应商':role==='hq'?'查看门店状态 · 分派核验任务 · 审批统一备货方案':'查看被分派的商品 · 提交现场核对记录';
+      $('marketingName').textContent=role==='owner'?'国庆老客回访券':'华东国庆老客回访方案';
+      $('marketingAudience').textContent=role==='owner'?'沉默老客 · 待核验':'已授权门店的人群范围 · 待核验';
+      document.querySelectorAll('.business-view').forEach(view=>view.classList.toggle('active',view.id==='business-'+domain));
+      document.querySelectorAll('.business-tabs button').forEach(button=>button.classList.toggle('active',button.dataset.domain===domain));
+    }
+    function calendarEventData(){
+      const staff=role==='staff';
+      const result=[
+        {day:4,type:'task',title:staff?'收到店长交接':'发起回访与备货 Task',description:'原始要求保留在 Task 中',task:'recall'},
+        {day:5,type:'task',title:staff?'处理今日交接':'回访方案待确认',description:'继续昨天的工作',task:'recall'},
+        {day:5,type:'insight',title:'礼盒库存需复核',description:'洞察有数据来源、读取时间和核验路径',page:'insights'},
+        {day:5,type:'dossier',title:'国庆活动阶段节点',description:'同一日期引用长期经营档案',page:'dossier'},
+        {day:9,type:'dossier',title:'国庆阶段复盘',description:'回到活动档案看 Task 与正式产物',page:'dossier'}
+      ];
+      if(staff){result.push({day:5,type:'shift',title:'早班 09:00–17:00',description:'已发布的个人班次 · 新街口店',page:'business',domain:'store'},{day:6,type:'shift',title:'休息日',description:'已发布的个人班次 · 新街口店',page:'business',domain:'store'},{day:7,type:'shift',title:'晚班 13:00–21:00',description:'已发布的个人班次 · 新街口店',page:'business',domain:'store'});}
+      else result.push({day:6,type:'task',title:'活动配置检查',description:'演示计划节点',task:'recall'});
+      tasks().filter(item=>item.repeatConfirmed&&item.repeat&&item.repeat!=='none').forEach(item=>{
+        const weekday='一二三四五六日天'.indexOf((item.repeatDetail.match(/(?:每)?周([一二三四五六日天])/)||[])[1]);
+        const monthlyDay=Number((item.repeatDetail.match(/(?:每月|每个月)(\d{1,2})[日号]/)||[])[1]);
+        const days=item.repeat==='daily'?[6,7,8,9,10]:item.repeat==='weekly'?[weekday<0?8:5+((weekday===7?6:weekday)-0+7)%7]:[monthlyDay>=5&&monthlyDay<=31?monthlyDay:10];
+        days.forEach(day=>result.push({day,type:'task',title:item.title,description:'周期性 Task 的计划运行 · 具体时间以 Task 设置为准',task:item.id}));
+      });
+      return result;
+    }
+    function renderCalendar(){
+      document.querySelectorAll('[data-cal-filter]').forEach(button=>button.classList.toggle('active',button.dataset.calFilter===calendarFilter));
+      const events=calendarEventData().filter(item=>calendarFilter==='all'||item.type===calendarFilter);
+      const labels=['一','二','三','四','五','六','日'].map(day=>`<div class="weekday">${day}</div>`);
+      const days=[...Array(3)].map(()=>'<div class="day blank"></div>');
+      for(let day=1;day<=31;day++){
+        const order={shift:0,task:1,insight:2,dossier:3};
+        const chips=events.filter(item=>item.day===day).sort((a,b)=>order[a.type]-order[b.type]).slice(0,2).map(item=>`<span class="calendar-chip ${item.type==='insight'?'warn':''}">${escapeHtml(item.title)}</span>`).join('');
+        days.push(`<button type="button" data-calendar-day="${day}" class="day selectable ${day===5?'today':''} ${calendarDay===day?'selected':''}">${String(day).padStart(2,'0')}${chips}</button>`);
+      }
+      days.push('<div class="day blank"></div>');
+      $('calendarGrid').innerHTML=[...labels,...days].join('');
+      $('calendarDayTitle').textContent=`10 月 ${calendarDay} 日`;
+      const selected=events.filter(item=>item.day===calendarDay);
+      $('calendarDayEvents').innerHTML=selected.length?selected.map(item=>`<article class="object-card"><div><span class="tag">${escapeHtml({task:'Task',insight:'洞察',shift:'班次',dossier:'档案节点'}[item.type])}</span><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.description)}</p></div><div class="object-actions"><button type="button" ${item.task?`data-task="${escapeHtml(item.task)}"`:`data-page="${escapeHtml(item.page)}" ${item.domain?`data-domain="${escapeHtml(item.domain)}"`:''}`}>打开 →</button></div></article>`).join(''):'<div class="today-empty">这一天没有当前筛选下的记录。日期仍可用于回看历史业务数据。</div>';
+    }
+    function renderShell(){
+      const owner=role==='owner',staff=role==='staff';
+      $('scopeName').textContent=role==='hq'?'栖禾咖啡 · 总部':'栖禾咖啡 · 新街口店';
+      $('scopeRole').textContent=owner?'店主 · 本店范围':staff?'店员 · 个人范围':'总部运营 · 华东区域';
+      $('locationScope').textContent=role==='hq'?'总部 · 华东':'新街口店';
+      $('homeScope').textContent=staff?'我的早班 · 新街口店':owner?'新街口店':'华东区域';
+      $('calendarScope').textContent=staff?'我的班次与任务 · 新街口店':owner?'新街口店':'华东区域';
+      $('dossierScope').textContent=role==='hq'?'华东区域':'新街口店';
+      $('dossierOwner').textContent=role==='hq'?'总部运营':staff?'店长 · 我可查看分派内容':'店主';
+      $('dossierTaskRecall').textContent=role==='staff'?'打开交接 Task →':'打开回访 Task →';
+      $('dossierTaskStock').textContent=role==='staff'?'打开货架核对 Task →':'打开备货 Task →';
+      $('roleSwitch').value=role;
+      $('locationPage').textContent=pageNames[page];
+      document.querySelectorAll('.page').forEach(section=>section.classList.toggle('active',section.id==='page-'+page));
+      document.querySelectorAll('[data-page]').forEach(button=>button.classList.toggle('active',button.dataset.page===page&&(!button.dataset.domain||button.dataset.domain===domain)));
+      document.querySelectorAll('.mobile-nav button').forEach(button=>button.classList.toggle('active',button.dataset.page===page||(page==='task'&&button.dataset.page==='tasks')||(button.id==='mobileMoreButton'&&['business','assets','dossier'].includes(page))));
+      document.querySelectorAll('[data-domain]').forEach(button=>{button.hidden=staff&&!['inventory','store'].includes(button.dataset.domain)});
+      renderTasks();renderTasksIndex();renderHome();renderTask();renderBusiness();renderCalendar();renderInsights();renderAssets();
+    }
+    function showPage(next){page=next;if($('mobileMenu').open)$('mobileMenu').close();setReferencePicker(false);renderShell();window.scrollTo({top:0,behavior:'auto'});}
+    function openTask(id){taskId=id;showPage('task');if(!isPhoneLayout())$('taskInput').focus();}
+    function openBusiness(target,fromTask=page==='task'){domain=target||task().domain||'customer';if(role==='staff'&&!['inventory','store'].includes(domain))domain='store';businessFromTask=fromTask;showPage('business');}
+    function detectRepeat(value){return /每天|每日/.test(value)?'daily':/每周|每星期/.test(value)?'weekly':/每月/.test(value)?'monthly':'none';}
+    function createTask(initial,options={}){
+      const value=initial.trim();
+      const id='local-'+Date.now();
+      const title=options.title||(value?value.slice(0,20)+(value.length>20?'…':''):'新 Task');
+      const scope=role==='hq'?'华东区域':role==='staff'?'新街口店 · 个人':'新街口店';
+      const repeat=detectRepeat(value);
+      tasks().unshift({id,title,status:value?'待处理':'未描述',kind:options.kind||'商家发起',scope,domain:options.domain||null,dossier:options.dossier||null,repeat,repeatDetail:repeat==='none'?'':value,repeatConfirmed:false,approval:'required',updated:'刚刚',context:[['业务范围',scope],['状态','尚未连接真实 Agent'],['保存位置','当前浏览器会话']],entries:value?[{type:'user',text:value,time:'刚刚'},{type:'agent',text:repeat==='none'?'已记录目标。可以继续补充业务范围和需要的结果。原型尚未连接真实 Agent。':'我识别到周期性要求。请先在 Task 设置中确认运行时间与业务变更的审批方式；原型不会启动真实定时任务。',time:'演示'}]:[]});
+      taskId=id;showPage('task');$('taskInput').focus();
+      return id;
+    }
+    function openTaskSettings(){const current=task();$('taskDomainSetting').value=current.domain||'';$('taskRepeatSetting').value=current.repeat||'none';$('taskRepeatDetail').value=current.repeatDetail||'';$('taskRepeatDetail').required=$('taskRepeatSetting').value!=='none';$('taskApprovalSetting').value=current.approval||'required';$('taskDossierSetting').value=current.dossier||'';$('taskSettingsDialog').showModal();}
+    document.body.addEventListener('click',event=>{
+      const button=event.target.closest('button');if(!button)return;
+      if(button.dataset.refCategory){referenceCategory=button.dataset.refCategory;renderReferencePicker();return;}
+      if(button.dataset.refId){const item=referenceCatalog().find(candidate=>candidate.id===button.dataset.refId);if(item)addDraftReference(item);return;}
+      if(button.dataset.removeRef){referenceDrafts[draftKey()]=draftReferences().filter(item=>item.id!==button.dataset.removeRef);renderComposerReferences();return;}
+      if(button.closest('#searchDialog')&&button.id!=='closeSearch')$('searchDialog').close();
+      if(button.dataset.insightView){insightView=button.dataset.insightView;renderInsights();return;}
+      if(button.dataset.assetFilter){assetFilter=button.dataset.assetFilter;renderAssets();return;}
+      if(button.dataset.asset){selectedAsset=button.dataset.asset;assetFilter='all';showPage('assets');return;}
+      if(button.dataset.assetRequest){const item=assets.find(asset=>asset.id===button.dataset.assetRequest&&asset.roles.includes(role));if(item&&item.storage!=='organization'){item.retentionRequest=true;renderAssets();}return;}
+      if(button.dataset.observationToggle){if(role!=='staff'){const key=button.dataset.observationToggle;observationEnabled[role][key]=!observationEnabled[role][key];renderInsights();renderHome();}return;}
+      if(button.dataset.insightTask){const finding=findings.find(item=>item.id===button.dataset.insightTask);if(finding&&role!=='staff')createTask(`请核验这条洞察：${finding.title}。先给我看依据，不要直接修改业务数据。`,{title:`处理：${finding.title}`,domain:finding.domain,dossier:'国庆活动',kind:'由洞察创建'});return;}
+      if(button.dataset.calendarDay){calendarDay=Number(button.dataset.calendarDay);renderCalendar();return;}
+      if(button.dataset.calendarJump){calendarDay=Number(button.dataset.calendarJump);calendarFilter='all';showPage('calendar');return;}
+      if(button.dataset.calFilter){calendarFilter=button.dataset.calFilter;renderCalendar();return;}
+      if(button.dataset.taskFilter){taskFilter=button.dataset.taskFilter;renderTasksIndex();return;}
+      if(button.dataset.dayIndex!==undefined){selectedDay=Number(button.dataset.dayIndex);renderHome();return;}
+      if(button.dataset.action==='new-task'){createTask('',{domain:page==='business'?domain:null});return;}
+      if(button.dataset.createPrompt){createTask(button.dataset.createPrompt,{domain:'store'});return;}
+      if(button.dataset.anchor){showPage('home');$(button.dataset.anchor).scrollIntoView({behavior:'smooth',block:'start'});return;}
+      if(button.dataset.task){openTask(button.dataset.task);return;}
+      if(button.closest('.business-tabs')&&button.dataset.domain){openBusiness(button.dataset.domain,businessFromTask);return;}
+      if(button.dataset.page){button.dataset.page==='business'?openBusiness(button.dataset.domain):showPage(button.dataset.page);return;}
+      if(button.dataset.prompt){$('homeInput').value=button.dataset.prompt;$('homeInput').focus();}
+    });
+    $('roleSwitch').addEventListener('change',event=>{setReferencePicker(false);role=event.target.value;taskId='recall';selectedDay=1;calendarDay=5;assetFilter='all';if(role==='staff')domain='store';renderShell();});
+    $('mobileMoreButton').addEventListener('click',()=>$('mobileMenu').showModal());
+    $('closeMobileMenu').addEventListener('click',()=>$('mobileMenu').close());
+    $('mobileMenu').addEventListener('click',event=>{if(event.target===$('mobileMenu'))$('mobileMenu').close();});
+    window.addEventListener('resize',()=>{if(!isPhoneLayout()&&$('mobileMenu').open)$('mobileMenu').close();});
+    document.addEventListener('focusin',event=>{if(event.target.matches('input,textarea'))document.body.classList.add('mobile-keyboard');});
+    document.addEventListener('focusout',event=>{if(event.target.matches('input,textarea'))setTimeout(()=>{if(!document.activeElement.matches('input,textarea'))document.body.classList.remove('mobile-keyboard');},0);});
+    $('newTaskButton').addEventListener('click',()=>createTask('',{domain:page==='business'?domain:null}));
+    $('searchButton').addEventListener('click',()=>{$('searchInput').value='';renderSearch();$('searchDialog').showModal();$('searchInput').focus();});
+    $('closeSearch').addEventListener('click',()=>$('searchDialog').close());
+    $('searchInput').addEventListener('input',renderSearch);
+    document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();$('searchButton').click();}});
+    $('taskBusinessButton').addEventListener('click',()=>openBusiness());
+    $('railBusinessButton').addEventListener('click',()=>openBusiness());
+    $('businessReferenceButton').addEventListener('click',()=>{const item=referenceCatalog().find(candidate=>candidate.id==='business:'+domain);if(item){addDraftReference(item);openTask(taskId);}});
+    $('businessReferenceQuick').addEventListener('click',()=>$('businessReferenceButton').click());
+    $('addReferenceButton').addEventListener('click',()=>setReferencePicker($('referencePicker').hidden));
+    $('closeReferencePicker').addEventListener('click',()=>setReferencePicker(false));
+    $('referenceSearch').addEventListener('input',renderReferencePicker);
+    $('uploadReferenceButton').addEventListener('click',()=>$('referenceFileInput').click());
+    $('referenceFileInput').addEventListener('change',event=>{for(const file of event.target.files){addDraftReference({id:'file:'+(++referenceFileSequence),type:'file',title:file.name,meta:'本地文件 · 仅演示文件名，未读取或上传'});}event.target.value='';});
+    document.addEventListener('click',event=>{if(!$('referencePicker').hidden&&!$('referencePicker').contains(event.target)&&!$('addReferenceButton').contains(event.target))setReferencePicker(false);});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('referencePicker').hidden)setReferencePicker(false);});
+    $('taskSettingsButton').addEventListener('click',openTaskSettings);
+    $('railSettingsButton').addEventListener('click',openTaskSettings);
+    $('closeTaskSettings').addEventListener('click',()=>$('taskSettingsDialog').close());
+    $('taskRepeatSetting').addEventListener('change',event=>{$('taskRepeatDetail').required=event.target.value!=='none';});
+    $('taskSettingsForm').addEventListener('submit',event=>{event.preventDefault();const current=task();current.domain=$('taskDomainSetting').value||null;current.repeat=$('taskRepeatSetting').value;current.repeatDetail=current.repeat==='none'?'':$('taskRepeatDetail').value.trim();current.repeatConfirmed=current.repeat!=='none';current.approval=$('taskApprovalSetting').value;current.dossier=$('taskDossierSetting').value||null;current.updated='刚刚';current.entries.push({type:'tool',text:current.repeatConfirmed?`已由当前用户确认周期设置：${current.repeatDetail}。原型不启动真实定时任务。`:'已更新 Task 分类、确认方式和档案关联。'});$('taskSettingsDialog').close();renderShell();});
+    $('homeForm').addEventListener('submit',event=>{event.preventDefault();const value=$('homeInput').value;if(!value.trim()){$('homeInput').focus();return;}$('homeInput').value='';createTask(value);});
+    $('taskForm').addEventListener('submit',event=>{
+      event.preventDefault();
+      const refs=draftReferences().slice();
+      const value=$('taskInput').value.trim()||(refs.length?'请结合这些引用继续处理。':'');
+      if(!value){$('taskInput').focus();return;}
+      const current=task(),first=current.entries.length===0;
+      if(first){current.title=value.slice(0,20)+(value.length>20?'…':'');current.status='待处理';}
+      const proposed=detectRepeat(value);
+      if(proposed!=='none'&&!current.repeatConfirmed){current.repeat=proposed;current.repeatDetail=value;}
+      current.entries.push({type:'user',text:value,time:'刚刚'});
+      if(refs.length)current.entries.push({type:'tool',text:'本次加入引用：'+refs.map(item=>referenceTypeName(item.type)+'「'+item.title+'」').join('、')+'。演示模式仅记录引用名称；执行时还需检查来源、版本与权限。'});
+      current.entries.push({type:'agent',text:proposed!=='none'&&!current.repeatConfirmed?'识别到周期性要求。请打开 Task 设置，确认运行时间、业务分类和审批方式。原型不会启动真实定时任务。':'已在原型中记录你的补充要求。此页面尚未连接真实 Agent 或有赞业务数据。',time:'演示'});
+      referenceDrafts[draftKey()]=[];
+      current.updated='刚刚';$('taskInput').value='';renderShell();$('taskFeed').scrollTop=$('taskFeed').scrollHeight;
+    });
+    $('taskInput').addEventListener('keydown',event=>{if((event.key==='@'||event.key==='/')&&!event.currentTarget.value.trim()){event.preventDefault();setReferencePicker(true,event.key==='/'?'skill':'all');return;}if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();$('taskForm').requestSubmit();}});
+    renderShell();
+  </script>
+</body>
+</html>
